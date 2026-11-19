@@ -36,6 +36,7 @@ build-firmware:
 
 flash-firmware:
 	espflash flash --port $(PORT) firmware/target/xtensa-esp32s3-none-elf/release/esp32-remote-firmware
+	@python3 -m esptool --port $(PORT) run 2>/dev/null || true
 
 verify-all: test-api test-ble build-web
 	@echo "\n>>> ALL CHECKS PASSED SUCCESSFULLY! <<<\n"

@@ -3,18 +3,69 @@
 
 /* ==========================================================================
    Cloudflare Dashboard Native Design System & Tokens
+   Dual-Theme (Light & Dark) Support with System Preference Sync
    ========================================================================== */
 
-:root {
+/* --------------------------------------------------------------------------
+   Light Mode Theme Tokens (Default)
+   -------------------------------------------------------------------------- */
+:root,
+[data-theme="light"] {
   /* Cloudflare Brand Colors */
   --cf-orange: #f6821f;
   --cf-orange-hover: #ea7314;
   --cf-orange-active: #d9650b;
   --cf-orange-glow: rgba(246, 130, 31, 0.2);
-  --cf-orange-subtle: rgba(246, 130, 31, 0.1);
+  --cf-orange-subtle: rgba(246, 130, 31, 0.08);
   --cf-orange-border: rgba(246, 130, 31, 0.35);
 
-  /* Cloudflare Dark Surfaces */
+  /* Surfaces */
+  --cf-bg: #f8fafc;
+  --cf-nav-bg: #ffffff;
+  --cf-subnav-bg: #ffffff;
+  --cf-card-bg: #ffffff;
+  --cf-card-elev: #f1f5f9;
+  --cf-inset: #f1f5f9;
+  --cf-input-bg: #ffffff;
+
+  /* Borders */
+  --cf-border: #e2e8f0;
+  --cf-border-strong: #cbd5e1;
+  --cf-border-subtle: #f1f5f9;
+
+  /* Typography */
+  --cf-text-strong: #0f172a;
+  --cf-text: #334155;
+  --cf-text-muted: #64748b;
+  --cf-text-faint: #94a3b8;
+
+  /* Status Tokens */
+  --cf-success: #059669;
+  --cf-success-bg: rgba(5, 150, 105, 0.1);
+  --cf-warning: #d97706;
+  --cf-warning-bg: rgba(217, 119, 6, 0.1);
+  --cf-danger: #dc2626;
+  --cf-danger-bg: rgba(220, 38, 38, 0.1);
+  --cf-info: #2563eb;
+  --cf-info-bg: rgba(37, 99, 235, 0.1);
+
+  /* Terminal Surface */
+  --cf-term-bg: #0b0f17;
+  --cf-term-header: #111724;
+  --cf-term-border: #1e293b;
+
+  /* Common Properties */
+  --radius-cf: 8px;
+  --radius-sm: 6px;
+  --radius-pill: 9999px;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Dark Mode Theme Tokens
+   -------------------------------------------------------------------------- */
+[data-theme="dark"] {
   --cf-bg: #0d121a;
   --cf-nav-bg: #111722;
   --cf-subnav-bg: #131b27;
@@ -23,18 +74,15 @@
   --cf-inset: #090e15;
   --cf-input-bg: #0d1420;
 
-  /* Cloudflare Borders */
   --cf-border: #222f42;
   --cf-border-strong: #2f4057;
   --cf-border-subtle: #192433;
 
-  /* Typography */
   --cf-text-strong: #f8fafc;
   --cf-text: #e2e8f0;
   --cf-text-muted: #8b9cb0;
   --cf-text-faint: #5a6e85;
 
-  /* Status Tokens */
   --cf-success: #10b981;
   --cf-success-bg: rgba(16, 185, 129, 0.12);
   --cf-warning: #f59e0b;
@@ -44,12 +92,57 @@
   --cf-info: #3b82f6;
   --cf-info-bg: rgba(59, 130, 246, 0.12);
 
-  /* Radius & Fonts */
-  --radius-cf: 8px;
-  --radius-sm: 6px;
-  --radius-pill: 9999px;
-  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --cf-term-bg: #06090e;
+  --cf-term-header: #0a0f16;
+  --cf-term-border: #222f42;
+}
+
+/* Automatic System Adaptation when no manual override */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    --cf-bg: #0d121a;
+    --cf-nav-bg: #111722;
+    --cf-subnav-bg: #131b27;
+    --cf-card-bg: #16202e;
+    --cf-card-elev: #1a2638;
+    --cf-inset: #090e15;
+    --cf-input-bg: #0d1420;
+
+    --cf-border: #222f42;
+    --cf-border-strong: #2f4057;
+    --cf-border-subtle: #192433;
+
+    --cf-text-strong: #f8fafc;
+    --cf-text: #e2e8f0;
+    --cf-text-muted: #8b9cb0;
+    --cf-text-faint: #5a6e85;
+
+    --cf-success: #10b981;
+    --cf-success-bg: rgba(16, 185, 129, 0.12);
+    --cf-warning: #f59e0b;
+    --cf-warning-bg: rgba(245, 158, 11, 0.12);
+    --cf-danger: #ef4444;
+    --cf-danger-bg: rgba(239, 68, 68, 0.12);
+    --cf-info: #3b82f6;
+    --cf-info-bg: rgba(59, 130, 246, 0.12);
+
+    --cf-term-bg: #06090e;
+    --cf-term-header: #0a0f16;
+    --cf-term-border: #222f42;
+  }
+}
+
+:root {
+  color-scheme: light dark;
+
+  &:has(> head > meta[name="color-scheme"][content="dark"]),
+  &[data-theme="dark"] {
+    color-scheme: dark;
+  }
+  &:has(> head > meta[name="color-scheme"][content="light"]),
+  &[data-theme="light"] {
+    color-scheme: light;
+  }
 }
 
 body {
@@ -59,6 +152,7 @@ body {
   color: var(--cf-text);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 /* --------------------------------------------------------------------------
@@ -76,6 +170,7 @@ body {
   top: 0;
   z-index: 50;
   backdrop-filter: blur(8px);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .cf-logo-wrapper {
@@ -90,17 +185,17 @@ body {
   gap: 0.45rem;
   padding: 0.25rem 0.65rem;
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--cf-inset);
   border: 1px solid var(--cf-border);
   font-size: 0.8rem;
   font-weight: 500;
-  color: var(--cf-text);
+  color: var(--cf-text-strong);
   transition: all 0.15s ease;
   cursor: pointer;
 }
 
 .cf-account-pill:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--cf-border);
   border-color: var(--cf-border-strong);
 }
 
@@ -116,6 +211,7 @@ body {
   color: var(--cf-text-muted);
   width: 280px;
   cursor: text;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 @media (min-width: 768px) {
@@ -128,7 +224,7 @@ body {
   margin-left: auto;
   font-size: 0.7rem;
   font-family: var(--mono);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--cf-inset);
   border: 1px solid var(--cf-border);
   border-radius: 4px;
   padding: 0.1rem 0.35rem;
@@ -142,6 +238,7 @@ body {
   background: var(--cf-subnav-bg);
   border-bottom: 1px solid var(--cf-border);
   padding: 1.25rem 1.25rem 0 1.25rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .cf-breadcrumbs {
@@ -195,7 +292,7 @@ body {
   align-items: center;
   justify-content: center;
   color: var(--cf-orange);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .cf-project-title {
@@ -270,12 +367,14 @@ body {
   font-size: 0.7rem;
   padding: 0.1rem 0.4rem;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--cf-inset);
+  border: 1px solid var(--cf-border);
   color: var(--cf-text-muted);
 }
 
 .cf-tab-button.active .cf-tab-count {
   background: var(--cf-orange-subtle);
+  border-color: var(--cf-orange-border);
   color: var(--cf-orange);
 }
 
@@ -312,7 +411,8 @@ body {
   gap: 0.5rem;
   position: relative;
   overflow: hidden;
-  transition: border-color 0.15s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.15s, background-color 0.15s;
 }
 
 .cf-metric-card:hover {
@@ -367,6 +467,8 @@ body {
   border-radius: var(--radius-cf);
   overflow: hidden;
   margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: background-color 0.15s, border-color 0.15s;
 }
 
 .cf-card-header {
@@ -417,14 +519,14 @@ body {
   color: #ffffff !important;
   font-weight: 600 !important;
   border: 1px solid transparent !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
   transition: all 0.15s ease !important;
 }
 
 .cf-btn-orange:hover:not(:disabled) {
   background: var(--cf-orange-hover) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(246, 130, 31, 0.35) !important;
+  box-shadow: 0 4px 10px rgba(246, 130, 31, 0.3) !important;
 }
 
 .cf-btn-orange:active:not(:disabled) {
@@ -433,7 +535,7 @@ body {
 }
 
 .cf-btn-ghost {
-  background: transparent;
+  background: var(--cf-card-bg);
   color: var(--cf-text);
   border: 1px solid var(--cf-border);
   border-radius: var(--radius-sm);
@@ -448,7 +550,7 @@ body {
 }
 
 .cf-btn-ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--cf-inset);
   border-color: var(--cf-border-strong);
   color: var(--cf-text-strong);
 }
@@ -462,21 +564,21 @@ body {
    7. Workers Tail / Real-Time Execution Console
    -------------------------------------------------------------------------- */
 .cf-tail-terminal {
-  background: #06090e;
-  border: 1px solid var(--cf-border-strong);
+  background: var(--cf-term-bg);
+  border: 1px solid var(--cf-term-border);
   border-radius: var(--radius-cf);
   font-family: var(--mono);
   display: flex;
   flex-direction: column;
   height: 380px;
   overflow: hidden;
-  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .cf-tail-header {
   height: 38px;
-  background: #0a0f16;
-  border-bottom: 1px solid var(--cf-border);
+  background: var(--cf-term-header);
+  border-bottom: 1px solid var(--cf-term-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -504,7 +606,7 @@ body {
 }
 
 .cf-log-time {
-  color: var(--cf-text-faint);
+  color: #64748b;
   font-size: 0.75rem;
   user-select: none;
   flex-shrink: 0;
@@ -561,8 +663,12 @@ body {
 
 .signal-bar {
   width: 3px;
-  background: #2b3846;
+  background: #cbd5e1;
   border-radius: 1px;
+}
+
+[data-theme="dark"] .signal-bar {
+  background: #2b3846;
 }
 
 .signal-bar.bar-1 { height: 4px; }
@@ -609,6 +715,10 @@ body {
 }
 
 .cf-table tr:hover td {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .cf-table tr:hover td {
   background: rgba(255, 255, 255, 0.02);
 }
 

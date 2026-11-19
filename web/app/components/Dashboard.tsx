@@ -38,6 +38,9 @@ import {
   Question,
   UserCircle,
   CaretDown,
+  Sun,
+  Moon,
+  Desktop,
 } from "@phosphor-icons/react";
 
 import {
@@ -92,6 +95,84 @@ export function Dashboard({
   initialProfiles,
   initialHistory,
 }: DashboardProps) {
+  // --- Theme State & System Sync ---
+  const [theme, setTheme] = useState<"system" | "light" | "dark">("dark");
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("dark");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("color-scheme") as "light" | "dark" | null;
+    if (stored === "light" || stored === "dark") {
+      setTheme(stored);
+      setResolvedTheme(stored);
+      document.documentElement.setAttribute("data-theme", stored);
+    } else {
+      setTheme("system");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setResolvedTheme(prefersDark ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
+    }
+
+    const mql = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleMqlChange = (e: MediaQueryListEvent) => {
+      const currentStored = localStorage.getItem("color-scheme");
+      if (!currentStored) {
+        const next = e.matches ? "dark" : "light";
+        setResolvedTheme(next);
+        document.documentElement.setAttribute("data-theme", next);
+      }
+    };
+    mql.addEventListener("change", handleMqlChange);
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "color-scheme") {
+        const val = e.newValue as "light" | "dark" | null;
+        if (val) {
+          setTheme(val);
+          setResolvedTheme(val);
+          document.documentElement.setAttribute("data-theme", val);
+        } else {
+          setTheme("system");
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const next = prefersDark ? "dark" : "light";
+          setResolvedTheme(next);
+          document.documentElement.setAttribute("data-theme", next);
+        }
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      mql.removeEventListener("change", handleMqlChange);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
+
+  const toggleTheme = (target?: "light" | "dark" | "system") => {
+    let next: "light" | "dark" | "system";
+    if (target) {
+      next = target;
+    } else {
+      next = resolvedTheme === "dark" ? "light" : "dark";
+    }
+
+    setTheme(next);
+    const meta = document.querySelector('meta[name="color-scheme"]') as HTMLMetaElement | null;
+
+    if (next === "system") {
+      localStorage.removeItem("color-scheme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const res = prefersDark ? "dark" : "light";
+      setResolvedTheme(res);
+      document.documentElement.setAttribute("data-theme", res);
+      if (meta) meta.content = "light dark";
+    } else {
+      localStorage.setItem("color-scheme", next);
+      setResolvedTheme(next);
+      document.documentElement.setAttribute("data-theme", next);
+      if (meta) meta.content = next;
+    }
+  };
+
   // --- Navigation & Core State ---
   const [activeTab, setActiveTab] = useState<
     "overview" | "console" | "gpio" | "wifi" | "profiles" | "devices" | "history" | "settings"
@@ -579,7 +660,7 @@ export function Dashboard({
       <header className="cf-global-nav">
         <div className="cf-logo-wrapper">
           <div className="flex items-center gap-2 cursor-pointer">
-            <CloudflareLogo variant="full" className="h-5 text-white" />
+            <CloudflareLogo variant="full" className="h-5 text-[var(--cf-text-strong)]" />
           </div>
 
           <span className="text-[var(--cf-border-strong)]">|</span>
@@ -611,20 +692,28 @@ export function Dashboard({
 
           <div className="flex items-center gap-2 text-[var(--cf-text-muted)]">
             <button
-              className="p-1.5 hover:text-white hover:bg-white/5 rounded transition-all"
+              onClick={() => toggleTheme()}
+              className="p-1.5 hover:text-[var(--cf-text-strong)] hover:bg-[var(--cf-inset)] rounded transition-all text-[var(--cf-text-muted)]"
+              title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} theme (currently ${theme})`}
+              aria-label={`Switch theme (currently ${theme})`}
+            >
+              {resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button
+              className="p-1.5 hover:text-[var(--cf-text-strong)] hover:bg-[var(--cf-inset)] rounded transition-all"
               title="Documentation"
             >
               <Question size={18} />
             </button>
             <button
-              className="p-1.5 hover:text-white hover:bg-white/5 rounded transition-all relative"
+              className="p-1.5 hover:text-[var(--cf-text-strong)] hover:bg-[var(--cf-inset)] rounded transition-all relative"
               title="Notifications"
             >
               <Bell size={18} />
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[var(--cf-orange)]" />
             </button>
             <div
-              className="w-7 h-7 rounded-full bg-[var(--cf-border-strong)] flex items-center justify-center font-bold text-xs text-white border border-[var(--cf-border)]"
+              className="w-7 h-7 rounded-full bg-[var(--cf-border-strong)] flex items-center justify-center font-bold text-xs text-[var(--cf-text-strong)] border border-[var(--cf-border)]"
               title="User Amit"
             >
               AM
@@ -1790,8 +1879,52 @@ export function Dashboard({
                 </div>
               </div>
 
-              <div className="cf-card-body space-y-5">
+              <div className="cf-card-body space-y-6">
                 <div>
+                  <h3 className="text-xs font-bold text-[var(--cf-text-strong)] uppercase tracking-wider mb-2">
+                    Interface Theme &amp; Color Scheme
+                  </h3>
+                  <div className="flex items-center gap-2 p-1.5 rounded-lg bg-[var(--cf-inset)] border border-[var(--cf-border)] w-fit flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => toggleTheme("light")}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                        theme === "light"
+                          ? "bg-[var(--cf-card-bg)] text-[var(--cf-text-strong)] shadow-xs border border-[var(--cf-border)]"
+                          : "text-[var(--cf-text-muted)] hover:text-[var(--cf-text-strong)]"
+                      }`}
+                    >
+                      <Sun size={15} className="text-amber-500" /> Light
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleTheme("dark")}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                        theme === "dark"
+                          ? "bg-[var(--cf-card-bg)] text-[var(--cf-text-strong)] shadow-xs border border-[var(--cf-border)]"
+                          : "text-[var(--cf-text-muted)] hover:text-[var(--cf-text-strong)]"
+                      }`}
+                    >
+                      <Moon size={15} className="text-sky-400" /> Dark
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleTheme("system")}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                        theme === "system"
+                          ? "bg-[var(--cf-card-bg)] text-[var(--cf-text-strong)] shadow-xs border border-[var(--cf-border)]"
+                          : "text-[var(--cf-text-muted)] hover:text-[var(--cf-text-strong)]"
+                      }`}
+                    >
+                      <Desktop size={15} /> System ({resolvedTheme})
+                    </button>
+                  </div>
+                  <p className="text-xs text-[var(--cf-text-faint)] mt-2">
+                    Override color scheme manually or automatically track your operating system theme preference.
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-[var(--cf-border)]">
                   <h3 className="text-xs font-bold text-[var(--cf-text-strong)] uppercase tracking-wider mb-2">
                     Client Identity UUID
                   </h3>
