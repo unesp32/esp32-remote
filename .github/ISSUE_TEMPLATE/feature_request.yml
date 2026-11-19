@@ -1,0 +1,54 @@
+name: Feature request
+description: Suggest an improvement to the firmware, the protocol, or the site.
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep it focused — one idea per issue. Read `CONTRIBUTING.md` first if you
+        plan to implement it yourself.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part?
+      options:
+        - Firmware (new commands, sensors, power, storage)
+        - Protocol (new verbs or fields — must change firmware + browser together)
+        - Website (UI, persistence, settings)
+        - Auth / multi-user
+        - CI / tooling
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the use case, not just the solution.
+      placeholder: I want to be able to ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?
+      placeholder: A new `PWM <pin> <duty>` verb that the site exposes as a slider.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What else could work, and why is it worse?
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: I am willing to open a PR for this.
+        - label: This touches the protocol, and I understand firmware and `web/src/protocol.js` must change together.
+        - label: This needs auth, which does not exist yet — I have read the "Security notes" section of the README.

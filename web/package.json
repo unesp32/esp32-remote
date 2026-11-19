@@ -1,0 +1,28 @@
+{
+  "name": "esp32-remote-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "esp32-remote control site — Cloudflare Worker + D1 backend, dependency-free browser app",
+  "license": "MIT",
+  "repository": "https://github.com/unesp32/esp32-remote",
+  "scripts": {
+    "dev": "cf dev",
+    "build": "cf build",
+    "deploy": "cf deploy",
+    "types": "cf workers types",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "2.0.0-rc.2",
+    "cf": "1.0.0-rc.1",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents@2.3.3": true,
+    "workerd@1.20261117.1": true,
+    "workerd@1.20261118.1": true
+  }
+}

@@ -1,0 +1,5 @@
+# Xtensa toolchain installed by `espup install xtensa`.
+# `RUSTUP_TOOLCHAIN` (set by some version managers) would override this file,
+# so the CI workflow and local builds both unset it explicitly.
+[toolchain]
+channel = "esp"

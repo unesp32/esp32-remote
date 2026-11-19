@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & discussion
+    url: https://github.com/unesp32/esp32-remote/discussions
+    about: Ask usage questions or talk through an idea before filing an issue.
+  - name: Live site
+    url: https://esp.virt.cc.cd
+    about: Check whether the deployed site is up before reporting a site bug.

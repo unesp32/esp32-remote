@@ -1,0 +1,77 @@
+name: Bug report
+description: Something is broken in the firmware, the site, or the link between them.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. The more of this you can fill in, the faster it gets fixed.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where is it broken?
+      options:
+        - Firmware (board does not boot / crashes / wrong behaviour)
+        - BLE link (will not connect, drops, wrong responses)
+        - Website (UI, persistence, wrong data)
+        - CI / build
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, what you actually saw.
+      placeholder: |
+        1. Opened esp.virt.cc.cd, pressed Connect
+        2. Picked esp32-remote
+        3. Pressed Scan ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: serial
+    attributes:
+      label: Serial output (if firmware-related)
+      description: Paste the boot log or the lines around the failure.
+      render: text
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Browser console output (if site-related)
+      render: text
+
+  - type: input
+    id: firmware-commit
+    attributes:
+      label: Firmware commit
+      description: `git rev-parse --short HEAD` inside `firmware/`.
+      placeholder: abc1234
+
+  - type: input
+    id: versions
+    attributes:
+      label: Tool versions
+      placeholder: espup x.y.z, espflash x.y.z, Node 24, browser + version
+
+  - type: input
+    id: board
+    attributes:
+      label: Board
+      placeholder: ESP32-S3 DevKitC-1, 16 MB flash
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues for this.
+          required: true
+        - label: This reproduces on the current `main` branch.
+        - label: I have not posted any secrets (Wi-Fi passwords, tokens) in this report.
+          required: true

@@ -1,0 +1,68 @@
+[package]
+name = "esp32-remote-firmware"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/unesp32/esp32-remote"
+description = "ESP32-S3 remote-control firmware: Wi-Fi provisioning + BLE GATT control"
+publish = false
+
+[dependencies]
+embassy-executor = "0.10.0"
+embassy-futures = "0.1"
+embassy-net = { version = "0.8.0", features = [
+    "dhcpv4",
+    "medium-ethernet",
+    "tcp",
+    "dns",
+] }
+embassy-sync = "0.7" # TODO: update once trouble supports 0.8
+embassy-time = "0.5.0"
+esp-alloc = "0.10"
+esp-backtrace = { version = "0.19", features = [
+    "esp32s3",
+    "panic-handler",
+    "println",
+] }
+esp-bootloader-esp-idf = { version = "0.5", features = ["esp32s3"] }
+esp-hal = { version = "1.1.2", features = ["esp32s3", "log-04", "unstable"] }
+esp-println = { version = "0.17", features = ["esp32s3", "log-04"] }
+esp-rtos = { version = "0.3.0", features = [
+    "esp32s3",
+    "esp-radio",
+    "embassy",
+    "log-04",
+] }
+esp-radio = { version = "0.18.0", features = [
+    "esp32s3",
+    "log-04",
+    "wifi",
+    "ble",
+    "coex",
+    "unstable",
+] }
+# Must match the version trouble-host uses, otherwise `Vec<u8, N>: AsGatt` fails.
+heapless = "0.9"
+log = "0.4.27"
+static_cell = "2.1.0"
+trouble-host = { version = "0.6.0", features = [
+    "default-packet-pool-mtu-255",
+    "derive",
+    "scan",
+] }
+
+[profile.dev]
+opt-level = 1
+
+# Wi-Fi / BLE stacks misbehave at opt-level 1.
+[profile.dev.package.esp-radio]
+opt-level = 3
+
+[profile.dev.package.embassy-net]
+opt-level = 3
+
+[profile.release]
+opt-level = 3
+debug = true
+debug-assertions = true
+codegen-units = 1

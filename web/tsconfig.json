@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    // No `DOM` lib: `.cloudflare/types/index.d.ts` declares the Worker
+    // runtime's own globals, and mixing the two produces duplicate
+    // `Request`/`Response`/`fetch` declarations.
+    "lib": ["ES2022"],
+    "types": [],
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": false,
+
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
+
+    "noEmit": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "cloudflare.config.ts",
+    "vite.config.ts",
+    ".cloudflare/types/index.d.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

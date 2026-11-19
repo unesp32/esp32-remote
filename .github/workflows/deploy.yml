@@ -1,0 +1,92 @@
+name: Deploy
+
+# Deploys the site from `main`. Nothing else deploys — that is the point of the
+# branch model in CONTRIBUTING.md: feature branches and `dev` only prove that
+# the build works, `main` is what actually ships.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    name: build + deploy to Cloudflare
+    runs-on: ubuntu-latest
+    # Required by `cf`: a token scoped to Workers Scripts/Edit, D1/Edit and
+    # Zone/Workers Routes/Edit, plus the account id.
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify credentials are configured
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets are not set"
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install
+        run: |
+          npm ci
+          npm install-scripts approve esbuild workerd || true
+
+      - name: Type-check
+        run: npm run check
+
+      - name: Build
+        run: npm run build
+
+      # `--prebuilt` uploads exactly what CI just built, so the deployed
+      # artifact is byte-identical to the one CI tested.
+      - name: Deploy
+        run: |
+          npx cf deploy --prebuilt \
+            --tag "sha-${GITHUB_SHA::12}" \
+            --message "deploy from ${GITHUB_REF_NAME} @ ${GITHUB_SHA::12}" \
+            --force
+
+      - name: Verify production
+        run: |
+          set -euo pipefail
+          url="https://esp.virt.cc.cd"
+          for i in $(seq 1 30); do
+            if code=$(curl -fsS -o /dev/null -w '%{http_code}' "$url/" 2>/dev/null) && [ "$code" = "200" ]; then
+              break
+            fi
+            sleep 3
+          done
+
+          echo "--- $url/ ---"
+          curl -fsS -o /dev/null -w 'HTTP %{http_code}\n' "$url/"
+
+          echo "--- $url/api/health ---"
+          body="$(curl -fsS "$url/api/health")"
+          echo "$body"
+          echo "$body" | grep -q '"ok":true'
+
+          echo "--- $url/api/bootstrap ---"
+          curl -fsS -o /dev/null -w 'HTTP %{http_code}\n' "$url/api/bootstrap"
+
+          echo "production is healthy"
+
+      - name: Full API smoke test
+        run: python3 ../scripts/smoke_api.py https://esp.virt.cc.cd

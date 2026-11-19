@@ -1,0 +1,158 @@
+name: CI
+
+# Runs on every push and pull request. `main` is the deployable branch and
+# `dev` is the integration branch — both must stay green.
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # --------------------------------------------------------------------------
+  # Website: type-check, syntax-check and produce Build Output.
+  # --------------------------------------------------------------------------
+  web:
+    name: web (typecheck + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      # `cf` pins its own postinstall scripts (workerd, esbuild); approve them
+      # explicitly rather than weakening npm's default policy globally.
+      - name: Install
+        run: |
+          npm ci
+          npm install-scripts approve esbuild workerd || true
+
+      - name: Type-check
+        run: npm run check
+
+      - name: Syntax-check browser modules
+        run: |
+          node --check src/app.js
+          node --check src/protocol.js
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload Build Output
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build-output
+          path: web/.cloudflare/output/
+          if-no-files-found: error
+          retention-days: 7
+
+  # --------------------------------------------------------------------------
+  # Firmware: formatting and a real Xtensa build.
+  # --------------------------------------------------------------------------
+  firmware:
+    name: firmware (fmt + xtensa build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firmware
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Xtensa toolchain (espup)
+        run: |
+          set -euo pipefail
+          cargo install espup --locked
+          espup install xtensa --toolchain-version 1.94.1 --target riscv32imac-unknown-none-elf
+          # espup writes ~/export-esp.sh; source it for every later step.
+          echo "$HOME" >> "$GITHUB_ENV"
+          {
+            echo "ESPUP_HOME=$HOME"
+            cat "$HOME/export-esp.sh"
+          } >> "$GITHUB_ENV"
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            firmware/target
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: firmware-${{ runner.os }}-${{ hashFiles('firmware/Cargo.lock') }}
+          restore-keys: firmware-${{ runner.os }}-
+
+      - name: cargo fmt
+        # `env -u` because version managers set RUSTUP_TOOLCHAIN, which would
+        # override rust-toolchain.toml and select the wrong toolchain.
+        run: |
+          . "$HOME/export-esp.sh"
+          env -u RUSTUP_TOOLCHAIN cargo fmt --all -- --check
+
+      - name: cargo build --release
+        run: |
+          . "$HOME/export-esp.sh"
+          env -u RUSTUP_TOOLCHAIN cargo build --release
+
+  # --------------------------------------------------------------------------
+  # API smoke test against a locally running worker.
+  # --------------------------------------------------------------------------
+  api-smoke:
+    name: web (api smoke test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install
+        run: |
+          npm ci
+          npm install-scripts approve esbuild workerd || true
+
+      - name: Start local worker
+        run: |
+          nohup npm run dev > /tmp/cf-dev.log 2>&1 &
+          echo $! > /tmp/cf-dev.pid
+
+      - name: Wait for the worker
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:5173/api/health > /dev/null 2>&1; then
+              echo "worker is up after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "worker never became healthy"
+          cat /tmp/cf-dev.log
+          exit 1
+
+      - name: Run smoke test
+        run: python3 ../scripts/smoke_api.py http://localhost:5173
+
+      - name: Stop worker
+        if: always()
+        run: |
+          kill "$(cat /tmp/cf-dev.pid)" 2>/dev/null || true
+          cat /tmp/cf-dev.log || true

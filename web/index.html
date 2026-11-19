@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>esp32-remote</title>
+    <meta
+      name="description"
+      content="Control an ESP32-S3 from the browser over Bluetooth — Wi-Fi provisioning, GPIO and device history, no app install."
+    />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0b0f14" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230b0f14'/><rect x='7' y='7' width='18' height='18' rx='3' fill='none' stroke='%2338e08b' stroke-width='2'/><rect x='13' y='13' width='6' height='6' fill='%2338e08b'/></svg>"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text">esp32<em>-remote</em></span>
+      </a>
+
+      <div class="topbar-right">
+        <span id="identity-pill" class="pill pill-ghost" title="Your anonymous workspace id">…</span>
+        <span id="conn-pill" class="pill pill-off">disconnected</span>
+        <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle colour theme">
+          ◐
+        </button>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab is-active" role="tab" data-tab="connect" aria-selected="true">
+        Connect
+      </button>
+      <button class="tab" role="tab" data-tab="wifi" aria-selected="false">Wi-Fi</button>
+      <button class="tab" role="tab" data-tab="devices" aria-selected="false">Devices</button>
+      <button class="tab" role="tab" data-tab="history" aria-selected="false">History</button>
+      <button class="tab" role="tab" data-tab="settings" aria-selected="false">Settings</button>
+    </nav>
+
+    <main>
+      <!-- ------------------------------------------------------------ -->
+      <!-- Connect                                                       -->
+      <!-- ------------------------------------------------------------ -->
+      <section id="panel-connect" class="panel is-active" role="tabpanel">
+        <div id="bt-support" class="notice notice-warn" hidden>
+          <strong>Web Bluetooth isn’t available here.</strong>
+          Open this page in Chrome, Edge or Opera on desktop or Android.
+          Firefox and Safari (including iOS) don’t implement the API.
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Bluetooth</h2>
+            <div class="card-actions">
+              <button id="btn-status" class="btn btn-ghost" type="button" disabled>Status</button>
+              <button id="btn-ping" class="btn btn-ghost" type="button" disabled>Ping</button>
+              <button id="btn-disconnect" class="btn btn-ghost" type="button" disabled>
+                Disconnect
+              </button>
+            </div>
+          </div>
+
+          <div class="connect-row">
+            <button id="btn-connect" class="btn btn-primary btn-lg" type="button">
+              Connect to ESP32
+            </button>
+            <label class="check">
+              <input id="auto-reconnect" type="checkbox" />
+              <span>Reconnect automatically</span>
+            </label>
+          </div>
+
+          <dl id="device-summary" class="kv" hidden>
+            <div><dt>Name</dt><dd id="d-name">—</dd></div>
+            <div><dt>Chip</dt><dd id="d-chip">—</dd></div>
+            <div><dt>Firmware</dt><dd id="d-fw">—</dd></div>
+            <div><dt>MAC</dt><dd id="d-mac">—</dd></div>
+            <div><dt>Wi-Fi</dt><dd id="d-wifi">—</dd></div>
+            <div><dt>IP</dt><dd id="d-ip">—</dd></div>
+            <div><dt>Signal</dt><dd id="d-rssi">—</dd></div>
+            <div><dt>LED</dt><dd id="d-led">—</dd></div>
+          </dl>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Controls</h2>
+          </div>
+
+          <div class="control-grid">
+            <div class="control">
+              <span class="control-label">Status LED</span>
+              <div class="btn-group">
+                <button id="led-on" class="btn" type="button" disabled>On</button>
+                <button id="led-off" class="btn" type="button" disabled>Off</button>
+                <button id="led-toggle" class="btn" type="button" disabled>Toggle</button>
+              </div>
+            </div>
+
+            <div class="control">
+              <span class="control-label">GPIO output</span>
+              <div class="inline-form">
+                <label class="field field-sm">
+                  <span>Pin</span>
+                  <input id="gpio-pin" type="number" min="0" max="48" value="48" />
+                </label>
+                <label class="field field-sm">
+                  <span>Level</span>
+                  <select id="gpio-level">
+                    <option value="1">High (1)</option>
+                    <option value="0">Low (0)</option>
+                  </select>
+                </label>
+                <button id="gpio-set" class="btn" type="button" disabled>Set</button>
+              </div>
+              <p class="hint">Safe ESP32-S3 pins: 0–18, 21, 38–48.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Console</h2>
+            <div class="card-actions">
+              <button id="console-clear" class="btn btn-ghost" type="button">Clear</button>
+            </div>
+          </div>
+
+          <div id="console" class="console" role="log" aria-live="polite"></div>
+
+          <form id="console-form" class="console-form">
+            <input
+              id="console-input"
+              type="text"
+              placeholder="e.g. SCAN, STATUS, LED TOGGLE, GPIO 5 1"
+              autocomplete="off"
+              spellcheck="false"
+              disabled
+            />
+            <button class="btn btn-primary" type="submit" disabled id="console-send">Send</button>
+          </form>
+
+          <div class="quick-actions">
+            <button class="chip" type="button" data-cmd="PING">PING</button>
+            <button class="chip" type="button" data-cmd="INFO">INFO</button>
+            <button class="chip" type="button" data-cmd="STATUS">STATUS</button>
+            <button class="chip" type="button" data-cmd="SCAN">SCAN</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ------------------------------------------------------------ -->
+      <!-- Wi-Fi                                                         -->
+      <!-- ------------------------------------------------------------ -->
+      <section id="panel-wifi" class="panel" role="tabpanel" hidden>
+        <div class="card">
+          <div class="card-head">
+            <h2>Scan for networks</h2>
+            <div class="card-actions">
+              <button id="btn-scan" class="btn" type="button" disabled>Scan</button>
+            </div>
+          </div>
+          <p class="hint">
+            Scanning happens on the ESP itself and streams back over Bluetooth. Connect first.
+          </p>
+          <div class="table-wrap">
+            <table id="scan-table">
+              <thead>
+                <tr>
+                  <th>Network</th>
+                  <th>Signal</th>
+                  <th>Ch</th>
+                  <th>Security</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="empty">
+                  <td colspan="5">No scan yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Join a network</h2>
+          </div>
+
+          <form id="join-form" class="form">
+            <label class="field">
+              <span>Network name (SSID)</span>
+              <input id="join-ssid" type="text" maxlength="32" placeholder="My Home WiFi" required />
+            </label>
+            <label class="field">
+              <span>Password</span>
+              <input id="join-pass" type="password" maxlength="64" placeholder="••••••••" />
+            </label>
+            <label class="check">
+              <input id="join-save" type="checkbox" checked />
+              <span>Remember this network</span>
+            </label>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit" id="btn-join" disabled>
+                Connect ESP to Wi-Fi
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Saved networks</h2>
+            <div class="card-actions">
+              <button id="btn-add-profile" class="btn btn-ghost" type="button">Add manually</button>
+            </div>
+          </div>
+
+          <form id="profile-form" class="form" hidden>
+            <div class="form-row">
+              <label class="field">
+                <span>SSID</span>
+                <input id="pf-ssid" type="text" maxlength="32" required />
+              </label>
+              <label class="field">
+                <span>Password</span>
+                <input id="pf-pass" type="password" maxlength="64" />
+              </label>
+              <label class="field field-sm">
+                <span>Band</span>
+                <select id="pf-band">
+                  <option value="">—</option>
+                  <option value="2.4">2.4 GHz</option>
+                  <option value="5">5 GHz</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Save network</button>
+              <button class="btn btn-ghost" type="button" id="pf-cancel">Cancel</button>
+            </div>
+          </form>
+
+          <div id="profile-list" class="list">
+            <p class="empty">No saved networks yet.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ------------------------------------------------------------ -->
+      <!-- Devices                                                       -->
+      <!-- ------------------------------------------------------------ -->
+      <section id="panel-devices" class="panel" role="tabpanel" hidden>
+        <div class="card">
+          <div class="card-head">
+            <h2>Known devices</h2>
+            <div class="card-actions">
+              <button id="btn-add-device" class="btn btn-ghost" type="button">Add device</button>
+            </div>
+          </div>
+
+          <form id="device-form" class="form" hidden>
+            <div class="form-row">
+              <label class="field">
+                <span>MAC address</span>
+                <input id="dv-mac" type="text" placeholder="e0:72:a1:f6:10:0c" required />
+              </label>
+              <label class="field">
+                <span>Display name</span>
+                <input id="dv-name" type="text" maxlength="64" placeholder="Workshop board" required />
+              </label>
+            </div>
+            <label class="field">
+              <span>Notes</span>
+              <textarea id="dv-notes" rows="2" maxlength="2000" placeholder="Where is it, what is it wired to…"></textarea>
+            </label>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Save device</button>
+              <button class="btn btn-ghost" type="button" id="dv-cancel">Cancel</button>
+            </div>
+          </form>
+
+          <div id="device-list" class="list">
+            <p class="empty">No devices recorded yet.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ------------------------------------------------------------ -->
+      <!-- History                                                       -->
+      <!-- ------------------------------------------------------------ -->
+      <section id="panel-history" class="panel" role="tabpanel" hidden>
+        <div class="card">
+          <div class="card-head">
+            <h2>Control history</h2>
+            <div class="card-actions">
+              <select id="history-filter" aria-label="Filter by device">
+                <option value="">All devices</option>
+              </select>
+              <button id="btn-history-refresh" class="btn btn-ghost" type="button">Refresh</button>
+              <button id="btn-history-clear" class="btn btn-ghost btn-danger" type="button">
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="history-table">
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>Dir</th>
+                  <th>Command</th>
+                  <th>Response</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="empty">
+                  <td colspan="5">Nothing logged yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ------------------------------------------------------------ -->
+      <!-- Settings                                                      -->
+      <!-- ------------------------------------------------------------ -->
+      <section id="panel-settings" class="panel" role="tabpanel" hidden>
+        <div class="card">
+          <div class="card-head">
+            <h2>Appearance</h2>
+          </div>
+          <div class="control-grid">
+            <div class="control">
+              <span class="control-label">Theme</span>
+              <div class="btn-group" id="theme-options">
+                <button class="btn" type="button" data-theme-value="dark">Dark</button>
+                <button class="btn" type="button" data-theme-value="light">Light</button>
+                <button class="btn" type="button" data-theme-value="system">System</button>
+              </div>
+            </div>
+            <div class="control">
+              <span class="control-label">Console timestamp</span>
+              <label class="check">
+                <input id="opt-timestamps" type="checkbox" />
+                <span>Show time next to each message</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Site data</h2>
+            <div class="card-actions">
+              <button id="btn-export" class="btn btn-ghost" type="button">Export JSON</button>
+              <button id="btn-reset" class="btn btn-ghost btn-danger" type="button">
+                Reset workspace
+              </button>
+            </div>
+          </div>
+          <p class="hint">
+            Everything this site remembers — devices, saved networks, history and settings — is
+            stored server-side against your anonymous workspace id.
+          </p>
+          <dl class="kv" id="site-stats">
+            <div><dt>Devices</dt><dd id="s-devices">0</dd></div>
+            <div><dt>Networks</dt><dd id="s-networks">0</dd></div>
+            <div><dt>History rows</dt><dd id="s-history">0</dd></div>
+            <div><dt>Workspace</dt><dd id="s-owner">—</dd></div>
+          </dl>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>About</h2>
+          </div>
+          <p class="hint">
+            Firmware in Rust (<code>esp-hal</code> + <code>esp-radio</code> + <code>trouble-host</code>),
+            site on Cloudflare Workers + D1. Protocol and GATT UUIDs are documented in
+            <code>CONTRIBUTING.md</code>.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
+
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>
