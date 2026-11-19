@@ -239,11 +239,15 @@ async fn connection_loop(
                 }
                 GattConnectionEvent::Gatt { event } => {
                     // Copy the payload out before `accept` consumes the event.
+                    let mut is_control_write = false;
                     let mut len = 0usize;
                     if let GattEvent::Write(write) = &event {
-                        let data = write.data();
-                        len = min(data.len(), raw.len());
-                        raw[..len].copy_from_slice(&data[..len]);
+                        if write.handle() == server.remote.control.handle {
+                            is_control_write = true;
+                            let data = write.data();
+                            len = min(data.len(), raw.len());
+                            raw[..len].copy_from_slice(&data[..len]);
+                        }
                     }
 
                     // The client waits for this reply — never skip it.
@@ -252,7 +256,7 @@ async fn connection_loop(
                         Err(e) => warn!("[ble] ATT accept error: {:?}", e),
                     }
 
-                    if len > 0 {
+                    if is_control_write && len > 0 {
                         match protocol::parse(&raw[..len]) {
                             Ok(cmd) => dispatch(cmd, server, conn, outputs, mac).await,
                             Err(e) => notify(server, conn, &e).await,

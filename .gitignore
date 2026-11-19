@@ -13,6 +13,8 @@ node_modules/
 web/dist/
 web/.cloudflare/
 web/.wrangler/
+web/.next/
+web/.vinext/
 .cloudflare/
 
 # ---------------------------------------------------------------------------

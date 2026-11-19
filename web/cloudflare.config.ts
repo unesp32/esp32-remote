@@ -5,8 +5,9 @@
  * `vite.config.ts`: this file describes *what runs where* (worker entrypoint,
  * bindings, routes), while Vite only describes *how to bundle it*.
  *
- * Bindings are constructed with `bindings.*` from `cf/config` so they stay
- * type-checked against the Worker's `env`.
+ * The entrypoint is vinext's fetch handler: the App Router in `app/` is
+ * compiled into the Worker, so there is no hand-written `src/index.ts`
+ * dispatching requests any more.
  */
 import { bindings, defineConfig, defineWorker } from "cf/config";
 
@@ -14,20 +15,25 @@ const worker = defineWorker({
   name: "esp32-remote",
   compatibilityDate: "2026-11-01",
 
-  // The Worker serves the JSON API; everything else falls through to the
-  // static asset bundle produced by Vite from `index.html` + `public/`.
-  entrypoint: "./src/index.ts",
+  // vinext owns request handling: App Router pages, server components, server
+  // actions and `app/api/**/route.ts` all run behind this handler.
+  entrypoint: "vinext/server/fetch-handler",
+
+  // Route everything through the Worker except the hashed build output, which
+  // is served straight from Workers Static Assets — that is most static
+  // traffic, so it costs no invocation. `vinext init` generates exactly these
+  // patterns; keep both exclusions or `/_next/static/*` returns 404.
   assets: {
-    // Route only the API to the Worker, so assets keep their CDN caching.
-    runWorkerFirst: ["/api/*"],
-    notFoundHandling: "single-page-application",
+    htmlHandling: "none",
+    notFoundHandling: "none",
+    runWorkerFirst: ["/*", "!/_next/static/*", "!/*/_next/static/*"],
   },
 
   // Custom domain on the `virt.cc.cd` zone (no `*.workers.dev` reliance).
   domains: ["esp.virt.cc.cd"],
 
   env: {
-    // Created on first `cf deploy`; named binding used by `src/index.ts`.
+    // Created on first `cf deploy`; named binding used through `cloudflare:workers`.
     DB: bindings.d1({ name: "esp32-remote" }),
   },
 

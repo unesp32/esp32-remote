@@ -3,11 +3,17 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    // No `DOM` lib: `.cloudflare/types/index.d.ts` declares the Worker
-    // runtime's own globals, and mixing the two produces duplicate
-    // `Request`/`Response`/`fetch` declarations.
-    "lib": ["ES2022"],
-    "types": [],
+    "jsx": "react-jsx",
+
+    // `DOM` is for client components (React, Web Bluetooth, `document`);
+    // `.cloudflare/types/index.d.ts` declares the Worker runtime globals for
+    // server components and route handlers. `skipLibCheck` keeps the two
+    // declaration sets from fighting over `Request`/`Response`.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // `vinext/types` loads the ambient declarations for `next/server`,
+    // `next/headers` and friends — vinext ships those shims instead of the
+    // `next` package, so `import ... from "next/headers"` type-checks.
+    "types": ["vinext/types"],
 
     "strict": true,
     "noUncheckedIndexedAccess": true,
@@ -25,6 +31,7 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": [
+    "app/**/*",
     "src/**/*.ts",
     "cloudflare.config.ts",
     "vite.config.ts",

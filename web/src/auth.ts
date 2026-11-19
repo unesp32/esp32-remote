@@ -25,6 +25,11 @@
 /** Cookie/header name carrying the anonymous identity. */
 export const IDENTITY_COOKIE = "esp_id";
 export const IDENTITY_HEADER = "x-esp-identity";
+/**
+ * Set to `1` by `middleware.ts` when it minted the id on this request, so
+ * exactly one layer records the owner instead of every layer racing to.
+ */
+export const IDENTITY_NEW_HEADER = "x-esp-identity-new";
 
 /** A resolved caller. `anonymous` is `false` once real auth lands. */
 export interface Identity {
@@ -105,7 +110,7 @@ export function createAnonymousAuth(
         };
       }
 
-      if (header && isValidId(header)) {
+      if (header && isValidIdentity(header)) {
         return {
           identity: { id: header, anonymous: true, source: "header" },
           minted: false,
@@ -173,8 +178,7 @@ export function readCookie(header: string | null, name: string): string | null {
 }
 
 /** Ids we accept from a client are UUIDs — anything else is treated as absent. */
-function isValidId(value: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-    value,
-  );
+export function isValidIdentity(value: string | null | undefined): value is string {
+  if (!value) return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 }
