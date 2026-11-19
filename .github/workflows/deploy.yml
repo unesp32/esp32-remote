@@ -50,7 +50,10 @@ jobs:
           npm install-scripts approve esbuild workerd || true
 
       - name: Type-check
-        run: npm run check
+        run: |
+          # `.cloudflare/types/index.d.ts` is gitignored; tsc needs it.
+          npm run types
+          npm run check
 
       - name: Build
         run: npm run build

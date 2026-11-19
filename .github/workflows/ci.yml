@@ -1,7 +1,8 @@
 name: CI
 
-# Runs on every push and pull request. `main` is the deployable branch and
-# `dev` is the integration branch — both must stay green.
+# Runs on every push to `main`/`dev` and on every pull request targeting them.
+# `main` is the deployable branch and `dev` is the integration branch — both
+# must stay green.
 on:
   push:
     branches: [main, dev]
@@ -18,7 +19,7 @@ permissions:
 
 jobs:
   # --------------------------------------------------------------------------
-  # Website: type-check, syntax-check and produce Build Output.
+  # Website: generate runtime types, type-check, syntax-check, Build Output.
   # --------------------------------------------------------------------------
   web:
     name: web (typecheck + build)
@@ -41,6 +42,11 @@ jobs:
         run: |
           npm ci
           npm install-scripts approve esbuild workerd || true
+
+      # `.cloudflare/types/index.d.ts` is gitignored and referenced by
+      # tsconfig, so tsc cannot run without generating it first.
+      - name: Generate Worker types
+        run: npm run types
 
       - name: Type-check
         run: npm run check
@@ -67,23 +73,20 @@ jobs:
   firmware:
     name: firmware (fmt + xtensa build)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: firmware
     steps:
       - uses: actions/checkout@v4
 
+      # Deliberately NOT under `defaults.run.working-directory: firmware` —
+      # rust-toolchain.toml there demands the `esp` toolchain, which does not
+      # exist yet at this point, and cargo would refuse to run at all.
       - name: Install Xtensa toolchain (espup)
+        working-directory: ${{ github.workspace }}
         run: |
           set -euo pipefail
           cargo install espup --locked
-          espup install xtensa --toolchain-version 1.94.1 --target riscv32imac-unknown-none-elf
-          # espup writes ~/export-esp.sh; source it for every later step.
-          echo "$HOME" >> "$GITHUB_ENV"
-          {
-            echo "ESPUP_HOME=$HOME"
-            cat "$HOME/export-esp.sh"
-          } >> "$GITHUB_ENV"
+          # `--name esp` matches `channel = "esp"` in firmware/rust-toolchain.toml.
+          espup install --targets esp32s3 --name esp
+          echo "ESPUP_EXPORT_FILE=$HOME/export-esp.sh" >> "$GITHUB_ENV"
 
       - name: Cache cargo
         uses: actions/cache@v4
@@ -95,14 +98,16 @@ jobs:
           key: firmware-${{ runner.os }}-${{ hashFiles('firmware/Cargo.lock') }}
           restore-keys: firmware-${{ runner.os }}-
 
+      # `env -u RUSTUP_TOOLCHAIN` because version managers set it, and it
+      # overrides rust-toolchain.toml — selecting the wrong toolchain.
       - name: cargo fmt
-        # `env -u` because version managers set RUSTUP_TOOLCHAIN, which would
-        # override rust-toolchain.toml and select the wrong toolchain.
+        working-directory: ${{ github.workspace }}/firmware
         run: |
           . "$HOME/export-esp.sh"
           env -u RUSTUP_TOOLCHAIN cargo fmt --all -- --check
 
       - name: cargo build --release
+        working-directory: ${{ github.workspace }}/firmware
         run: |
           . "$HOME/export-esp.sh"
           env -u RUSTUP_TOOLCHAIN cargo build --release
@@ -137,7 +142,7 @@ jobs:
 
       - name: Wait for the worker
         run: |
-          for i in $(seq 1 60); do
+          for i in $(seq 1 90); do
             if curl -fsS http://localhost:5173/api/health > /dev/null 2>&1; then
               echo "worker is up after ${i}s"
               exit 0
