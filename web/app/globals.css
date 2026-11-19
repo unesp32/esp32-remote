@@ -2,243 +2,555 @@
 @import "@cloudflare/kumo/styles/standalone";
 
 /* ==========================================================================
-   esp32-remote — Core Layout & Custom Styling
+   Cloudflare Dashboard Native Design System & Tokens
    ========================================================================== */
 
 :root {
-  --bg: #0b0f14;
-  --bg-elev: #11171f;
-  --bg-inset: #0e141b;
-  --border: #1e2833;
-  --border-strong: #2b3846;
-  --text: #e6edf5;
-  --text-dim: #93a4b8;
-  --text-faint: #64748b;
+  /* Cloudflare Brand Colors */
+  --cf-orange: #f6821f;
+  --cf-orange-hover: #ea7314;
+  --cf-orange-active: #d9650b;
+  --cf-orange-glow: rgba(246, 130, 31, 0.2);
+  --cf-orange-subtle: rgba(246, 130, 31, 0.1);
+  --cf-orange-border: rgba(246, 130, 31, 0.35);
 
-  --accent: #38e08b;
-  --accent-dim: #1f9d5f;
-  --accent-contrast: #05231a;
+  /* Cloudflare Dark Surfaces */
+  --cf-bg: #0d121a;
+  --cf-nav-bg: #111722;
+  --cf-subnav-bg: #131b27;
+  --cf-card-bg: #16202e;
+  --cf-card-elev: #1a2638;
+  --cf-inset: #090e15;
+  --cf-input-bg: #0d1420;
 
-  --warn: #f5b544;
-  --danger: #ff6b6b;
-  --info: #58b6ff;
+  /* Cloudflare Borders */
+  --cf-border: #222f42;
+  --cf-border-strong: #2f4057;
+  --cf-border-subtle: #192433;
 
-  --radius: 12px;
-  --radius-sm: 8px;
+  /* Typography */
+  --cf-text-strong: #f8fafc;
+  --cf-text: #e2e8f0;
+  --cf-text-muted: #8b9cb0;
+  --cf-text-faint: #5a6e85;
+
+  /* Status Tokens */
+  --cf-success: #10b981;
+  --cf-success-bg: rgba(16, 185, 129, 0.12);
+  --cf-warning: #f59e0b;
+  --cf-warning-bg: rgba(245, 158, 11, 0.12);
+  --cf-danger: #ef4444;
+  --cf-danger-bg: rgba(239, 68, 68, 0.12);
+  --cf-info: #3b82f6;
+  --cf-info-bg: rgba(59, 130, 246, 0.12);
+
+  /* Radius & Fonts */
+  --radius-cf: 8px;
+  --radius-sm: 6px;
+  --radius-pill: 9999px;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: var(--cf-bg);
+  color: var(--cf-text);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
 }
 
-/* App Container */
-.app-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem;
+/* --------------------------------------------------------------------------
+   1. Cloudflare Global Header (Top Navigation Bar)
+   -------------------------------------------------------------------------- */
+.cf-global-nav {
+  height: 52px;
+  background: var(--cf-nav-bg);
+  border-bottom: 1px solid var(--cf-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+}
+
+.cf-logo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cf-account-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--cf-border);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--cf-text);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.cf-account-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--cf-border-strong);
+}
+
+.cf-search-box {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--cf-input-bg);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  color: var(--cf-text-muted);
+  width: 280px;
+  cursor: text;
 }
 
 @media (min-width: 768px) {
-  .app-container {
-    padding: 2.5rem 2rem;
+  .cf-search-box {
+    display: flex;
   }
 }
 
-/* Header Navbar */
-.app-header {
+.cf-search-kbd {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--cf-border);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  color: var(--cf-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   2. Cloudflare Zone / Worker Sub-Header
+   -------------------------------------------------------------------------- */
+.cf-sub-nav {
+  background: var(--cf-subnav-bg);
+  border-bottom: 1px solid var(--cf-border);
+  padding: 1.25rem 1.25rem 0 1.25rem;
+}
+
+.cf-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--cf-text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.cf-breadcrumb-link {
+  color: var(--cf-text-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.cf-breadcrumb-link:hover {
+  color: var(--cf-text-strong);
+}
+
+.cf-project-header {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 1.5rem;
 }
 
 @media (min-width: 640px) {
-  .app-header {
+  .cf-project-header {
     flex-direction: row;
     align-items: center;
   }
 }
 
-.brand-wrapper {
+.cf-project-title-row {
   display: flex;
   align-items: center;
-  gap: 0.875rem;
-}
-
-.brand-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent);
-}
-
-.brand-title {
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.brand-subtitle {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  margin: 0.15rem 0 0 0;
-}
-
-/* Status Cards & Telemetry */
-.telemetry-card {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.card-title {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-faint);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.telemetry-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
+.cf-product-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-cf);
+  background: var(--cf-card-bg);
+  border: 1px solid var(--cf-border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cf-orange);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.cf-project-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--cf-text-strong);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.cf-domain-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--cf-text-muted);
+  text-decoration: none;
+  margin-top: 0.15rem;
+  transition: color 0.15s;
+}
+
+.cf-domain-link:hover {
+  color: var(--cf-orange);
+}
+
+/* --------------------------------------------------------------------------
+   3. Cloudflare Navigation Tabs (Horizontal Strip)
+   -------------------------------------------------------------------------- */
+.cf-tabs-container {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-top: 0.5rem;
+}
+
+.cf-tabs-container::-webkit-scrollbar {
+  display: none;
+}
+
+.cf-tab-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.95rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--cf-text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.cf-tab-button:hover {
+  color: var(--cf-text-strong);
+}
+
+.cf-tab-button.active {
+  color: var(--cf-orange);
+  border-bottom-color: var(--cf-orange);
+  font-weight: 600;
+}
+
+.cf-tab-count {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--cf-text-muted);
+}
+
+.cf-tab-button.active .cf-tab-count {
+  background: var(--cf-orange-subtle);
+  color: var(--cf-orange);
+}
+
+/* --------------------------------------------------------------------------
+   4. Cloudflare Analytics Metric Cards (Executive Tiles)
+   -------------------------------------------------------------------------- */
+.cf-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
 @media (min-width: 640px) {
-  .telemetry-grid {
+  .cf-metrics-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (min-width: 1024px) {
-  .telemetry-grid {
+  .cf-metrics-grid {
     grid-template-columns: repeat(6, 1fr);
   }
 }
 
-.stat-item {
+.cf-metric-card {
+  background: var(--cf-card-bg);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--radius-cf);
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  justify-content: space-between;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.15s;
 }
 
-.stat-label {
+.cf-metric-card:hover {
+  border-color: var(--cf-border-strong);
+}
+
+.cf-metric-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background 0.15s;
+}
+
+.cf-metric-card.highlight::before {
+  background: var(--cf-orange);
+}
+
+.cf-metric-label {
   font-size: 0.75rem;
-  color: var(--text-faint);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cf-text-faint);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-.stat-value {
-  font-size: 0.925rem;
+.cf-metric-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--cf-text-strong);
   font-family: var(--mono);
-  font-weight: 500;
-  color: var(--text);
   word-break: break-all;
 }
 
-/* Quick Action Toolbar */
-.actions-toolbar {
+.cf-metric-subtext {
+  font-size: 0.725rem;
+  color: var(--cf-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   5. Cloudflare Dashboard Cards & Panels
+   -------------------------------------------------------------------------- */
+.cf-card {
+  background: var(--cf-card-bg);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--radius-cf);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.cf-card-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--cf-border);
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   flex-wrap: wrap;
+}
+
+.cf-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cf-text-strong);
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--border);
-  margin-top: 1rem;
 }
 
-/* Main Content Panel */
-.panel-card {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
+.cf-card-desc {
+  font-size: 0.8rem;
+  color: var(--cf-text-muted);
+  margin-top: 0.15rem;
 }
 
-.panel-tabs-bar {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-inset);
-}
-
-.panel-body {
+.cf-card-body {
   padding: 1.25rem;
 }
 
-/* Terminal Console */
-.terminal-window {
-  background: #05080c;
-  border: 1px solid var(--border-strong);
+.cf-card-footer {
+  padding: 0.75rem 1.25rem;
+  background: var(--cf-inset);
+  border-top: 1px solid var(--cf-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.775rem;
+  color: var(--cf-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   6. Cloudflare Buttons & Controls
+   -------------------------------------------------------------------------- */
+.cf-btn-orange {
+  background: var(--cf-orange) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border: 1px solid transparent !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  transition: all 0.15s ease !important;
+}
+
+.cf-btn-orange:hover:not(:disabled) {
+  background: var(--cf-orange-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(246, 130, 31, 0.35) !important;
+}
+
+.cf-btn-orange:active:not(:disabled) {
+  background: var(--cf-orange-active) !important;
+  transform: translateY(0);
+}
+
+.cf-btn-ghost {
+  background: transparent;
+  color: var(--cf-text);
+  border: 1px solid var(--cf-border);
   border-radius: var(--radius-sm);
-  padding: 1rem;
-  font-family: var(--mono);
+  padding: 0.35rem 0.75rem;
   font-size: 0.8rem;
-  height: 340px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s;
+}
+
+.cf-btn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--cf-border-strong);
+  color: var(--cf-text-strong);
+}
+
+.cf-btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   7. Workers Tail / Real-Time Execution Console
+   -------------------------------------------------------------------------- */
+.cf-tail-terminal {
+  background: #06090e;
+  border: 1px solid var(--cf-border-strong);
+  border-radius: var(--radius-cf);
+  font-family: var(--mono);
+  display: flex;
+  flex-direction: column;
+  height: 380px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+
+.cf-tail-header {
+  height: 38px;
+  background: #0a0f16;
+  border-bottom: 1px solid var(--cf-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.85rem;
+  font-size: 0.75rem;
+  color: var(--cf-text-muted);
+}
+
+.cf-tail-scroll {
+  flex: 1;
+  padding: 0.85rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+  font-size: 0.8rem;
 }
 
-.terminal-line {
+.cf-log-row {
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 0.6rem;
   line-height: 1.45;
+  padding: 0.15rem 0;
 }
 
-.terminal-time {
-  color: var(--text-faint);
-  user-select: none;
+.cf-log-time {
+  color: var(--cf-text-faint);
   font-size: 0.75rem;
+  user-select: none;
+  flex-shrink: 0;
 }
 
-.terminal-prefix-tx { color: #38bdf8; font-weight: bold; }
-.terminal-prefix-rx { color: #34d399; font-weight: bold; }
-.terminal-prefix-sys { color: #c084fc; font-weight: bold; }
-.terminal-prefix-err { color: #f87171; font-weight: bold; }
+.cf-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
 
-.terminal-text-tx { color: #bae6fd; }
-.terminal-text-rx { color: #a7f3d0; }
-.terminal-text-sys { color: #cbd5e1; }
-.terminal-text-err { color: #fca5a5; }
+.cf-tag-tx {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
 
-/* Signal RSSI Indicator */
+.cf-tag-rx {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.cf-tag-sys {
+  background: rgba(192, 132, 252, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(192, 132, 252, 0.3);
+}
+
+.cf-tag-err {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.cf-log-msg {
+  color: #e2e8f0;
+  word-break: break-all;
+}
+
+/* --------------------------------------------------------------------------
+   8. Signal Strength Meter (4 Bars)
+   -------------------------------------------------------------------------- */
 .signal-bars {
   display: inline-flex;
   align-items: flex-end;
@@ -259,5 +571,88 @@ body {
 .signal-bar.bar-4 { height: 14px; }
 
 .signal-bar.active {
-  background: var(--accent);
+  background: var(--cf-orange);
+}
+
+/* --------------------------------------------------------------------------
+   9. Cloudflare Data Tables
+   -------------------------------------------------------------------------- */
+.cf-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--cf-border);
+  border-radius: var(--radius-cf);
+  background: var(--cf-card-bg);
+}
+
+.cf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.825rem;
+  text-align: left;
+}
+
+.cf-table th {
+  background: var(--cf-inset);
+  color: var(--cf-text-faint);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.725rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--cf-border);
+}
+
+.cf-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--cf-border-subtle);
+  color: var(--cf-text);
+}
+
+.cf-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cf-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* --------------------------------------------------------------------------
+   10. Interactive GPIO Grid & Switches
+   -------------------------------------------------------------------------- */
+.cf-gpio-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .cf-gpio-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cf-gpio-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.cf-gpio-card {
+  background: var(--cf-inset);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--radius-cf);
+  padding: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.15s;
+}
+
+.cf-gpio-card:hover {
+  border-color: var(--cf-border-strong);
+}
+
+.cf-gpio-card.active {
+  border-color: var(--cf-orange);
+  background: var(--cf-card-elev);
 }

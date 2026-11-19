@@ -2,9 +2,9 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata = {
-  title: "esp32-remote — Web Bluetooth & Wi-Fi Provisioning",
+  title: "esp32-remote · Cloudflare Dashboard",
   description:
-    "Control an ESP32-S3 from the browser over Bluetooth — Wi-Fi provisioning, GPIO, telemetry and device history on Cloudflare.",
+    "Cloudflare Workers + Vinext remote control and Wi-Fi provisioning for ESP32-S3 over Web Bluetooth.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -12,10 +12,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" data-theme="dark">
       <head>
         <meta name="color-scheme" content="dark" />
-        <meta name="theme-color" content="#0b0f14" />
+        <meta name="theme-color" content="#111722" />
         <link
           rel="icon"
-          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230b0f14'/><rect x='7' y='7' width='18' height='18' rx='3' fill='none' stroke='%2338e08b' stroke-width='2'/><rect x='13' y='13' width='6' height='6' fill='%2338e08b'/></svg>"
+          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23111722'/><path d='M23 18a4 4 0 0 0-4-4 4.5 4.5 0 0 0-8.7 1.2A3.5 3.5 0 0 0 7 18.5a3.5 3.5 0 0 0 3.5 3.5h12.5a3 3 0 0 0 0-6z' fill='%23f6821f'/></svg>"
         />
       </head>
       <body>{children}</body>
