@@ -62,5 +62,5 @@ export function proxy(request: NextRequest): Response {
  * purpose: the API answers with the same identity cookie as the pages.
  */
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon\\.ico|manifest\\.webmanifest|sw\\.js|icons).*)"],
 };

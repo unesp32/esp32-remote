@@ -1,0 +1,33 @@
+{
+  "id": "/",
+  "name": "Cloudflare ESP32 Remote",
+  "short_name": "ESP32 Remote",
+  "description": "Cloudflare Workers + Vinext remote control and Wi-Fi provisioning for ESP32-S3 over Web Bluetooth.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0d121a",
+  "background_color": "#0d121a",
+  "categories": ["utilities", "developer tools"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -26,7 +26,14 @@ const worker = defineWorker({
   assets: {
     htmlHandling: "none",
     notFoundHandling: "none",
-    runWorkerFirst: ["/*", "!/_next/static/*", "!/*/_next/static/*"],
+    runWorkerFirst: [
+      "/*",
+      "!/_next/static/*",
+      "!/*/_next/static/*",
+      "!/manifest.webmanifest",
+      "!/sw.js",
+      "!/icons/*",
+    ],
   },
 
   // Custom domain on the `virt.cc.cd` zone (no `*.workers.dev` reliance).
