@@ -76,11 +76,17 @@ pub enum Cmd {
     Scan,
     Status,
     /// `JOIN ssid=<ssid> pass=<password>`
-    Join { ssid: Vec<u8, 32>, pass: Vec<u8, 64> },
+    Join {
+        ssid: Vec<u8, 32>,
+        pass: Vec<u8, 64>,
+    },
     /// `LED ON|OFF|TOGGLE` → 1 = on, 0 = off, 2 = toggle.
     Led(u8),
     /// `GPIO <pin> <0|1>`
-    Gpio { pin: u8, level: u8 },
+    Gpio {
+        pin: u8,
+        level: u8,
+    },
 }
 
 /// Parse one raw GATT write into a [`Cmd`].

@@ -26,28 +26,28 @@ use embassy_futures::select::{select, Either};
 use embassy_net::{Runner, Stack as NetStack, StackResources};
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::channel::Channel;
-use embassy_time::{Duration, Timer, with_timeout};
+use embassy_time::{with_timeout, Duration, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
 use esp_hal::{
     clock::CpuClock,
     gpio::{AnyPin, Level, Output, OutputConfig},
     interrupt::software::SoftwareInterruptControl,
-    ram, rng::Rng,
+    ram,
+    rng::Rng,
     timer::timg::TimerGroup,
 };
-use heapless::Vec;
 use esp_radio::{
     ble::controller::BleConnector,
     wifi::{
-        Config, ControllerConfig, Interface, WifiController, scan::ScanConfig,
-        sta::StationConfig,
+        scan::ScanConfig, sta::StationConfig, Config, ControllerConfig, Interface, WifiController,
     },
 };
+use heapless::Vec;
 use log::{info, warn};
 use trouble_host::prelude::*;
 
-use gatt::{CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, Server};
+use gatt::{Server, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX};
 use protocol::{Cmd, Line};
 
 esp_bootloader_esp_idf::esp_app_desc!();
@@ -121,7 +121,11 @@ async fn main(spawner: Spawner) -> ! {
     spawner.spawn(wifi_task(wifi_controller, net_stack).unwrap());
     spawner.spawn(net_task(net_runner).unwrap());
 
-    info!("esp32-remote firmware {} on {}", FW_VERSION, esp_hal::chip!());
+    info!(
+        "esp32-remote firmware {} on {}",
+        FW_VERSION,
+        esp_hal::chip!()
+    );
 
     loop {
         Timer::after(Duration::from_secs(3600)).await;
@@ -168,51 +172,48 @@ async fn ble_task(controller: ExternalController<BleConnector<'static>, 1>, mac:
     // GPIO outputs we have already claimed, keyed by pin number.
     let mut outputs: Vec<(u8, Output<'static>), MAX_PINS> = Vec::new();
 
-    let _ = join(
-        runner.run(),
-        async {
-            loop {
-                let params = AdvertisementParameters::default();
-                let advertised = peripheral
-                    .advertise(
-                        &params,
-                        Advertisement::ConnectableScannableUndirected {
-                            adv_data: &adv_data[..adv_len],
-                            scan_data: &[],
-                        },
-                    )
-                    .await;
-
-                let adv = match advertised {
-                    Ok(adv) => adv,
-                    Err(e) => {
-                        warn!("[ble] advertise error: {:?}", e);
-                        Timer::after(Duration::from_secs(1)).await;
-                        continue;
-                    }
-                };
-
-                let accepted = adv.accept().await;
-                let conn = match accepted {
-                    Ok(conn) => match conn.with_attribute_server(&server) {
-                        Ok(conn) => conn,
-                        Err(e) => {
-                            warn!("[ble] attribute server error: {:?}", e);
-                            continue;
-                        }
+    let _ = join(runner.run(), async {
+        loop {
+            let params = AdvertisementParameters::default();
+            let advertised = peripheral
+                .advertise(
+                    &params,
+                    Advertisement::ConnectableScannableUndirected {
+                        adv_data: &adv_data[..adv_len],
+                        scan_data: &[],
                     },
+                )
+                .await;
+
+            let adv = match advertised {
+                Ok(adv) => adv,
+                Err(e) => {
+                    warn!("[ble] advertise error: {:?}", e);
+                    Timer::after(Duration::from_secs(1)).await;
+                    continue;
+                }
+            };
+
+            let accepted = adv.accept().await;
+            let conn = match accepted {
+                Ok(conn) => match conn.with_attribute_server(&server) {
+                    Ok(conn) => conn,
                     Err(e) => {
-                        warn!("[ble] accept error: {:?}", e);
+                        warn!("[ble] attribute server error: {:?}", e);
                         continue;
                     }
-                };
+                },
+                Err(e) => {
+                    warn!("[ble] accept error: {:?}", e);
+                    continue;
+                }
+            };
 
-                info!("[ble] central connected");
-                connection_loop(&server, &conn, &mut outputs, mac).await;
-                info!("[ble] central disconnected");
-            }
-        },
-    )
+            info!("[ble] central connected");
+            connection_loop(&server, &conn, &mut outputs, mac).await;
+            info!("[ble] central disconnected");
+        }
+    })
     .await;
 }
 
@@ -297,7 +298,13 @@ async fn dispatch(
             let next = match action {
                 0 => 0,
                 1 => 1,
-                _ => if current == 0 { 1 } else { 0 },
+                _ => {
+                    if current == 0 {
+                        1
+                    } else {
+                        0
+                    }
+                }
             };
             match drive_pin(outputs, DEFAULT_LED_PIN, next) {
                 Ok(()) => {
@@ -305,11 +312,7 @@ async fn dispatch(
                     notify(
                         server,
                         conn,
-                        &Line::from_static(if next == 1 {
-                            "OK LED 1"
-                        } else {
-                            "OK LED 0"
-                        }),
+                        &Line::from_static(if next == 1 { "OK LED 1" } else { "OK LED 0" }),
                     )
                     .await;
                 }
@@ -385,7 +388,13 @@ async fn notify(
     conn: &GattConnection<'_, '_, DefaultPacketPool>,
     line: &Line,
 ) {
-    if server.remote.control.notify(conn, line.value()).await.is_err() {
+    if server
+        .remote
+        .control
+        .notify(conn, line.value())
+        .await
+        .is_err()
+    {
         warn!("[ble] notify failed");
     }
 }
@@ -444,14 +453,18 @@ async fn wifi_task(mut controller: WifiController<'static>, stack: NetStack<'sta
                 let ssid_str = match core::str::from_utf8(&ssid) {
                     Ok(s) => s,
                     Err(_) => {
-                        let _ = resp_tx.send(Line::from_static("ERR JOIN ssid not UTF-8")).await;
+                        let _ = resp_tx
+                            .send(Line::from_static("ERR JOIN ssid not UTF-8"))
+                            .await;
                         continue;
                     }
                 };
                 let pass_str = match core::str::from_utf8(&pass) {
                     Ok(s) => s,
                     Err(_) => {
-                        let _ = resp_tx.send(Line::from_static("ERR JOIN password not UTF-8")).await;
+                        let _ = resp_tx
+                            .send(Line::from_static("ERR JOIN password not UTF-8"))
+                            .await;
                         continue;
                     }
                 };
@@ -469,7 +482,8 @@ async fn wifi_task(mut controller: WifiController<'static>, stack: NetStack<'sta
                     continue;
                 }
 
-                let joined = with_timeout(Duration::from_secs(30), controller.connect_async()).await;
+                let joined =
+                    with_timeout(Duration::from_secs(30), controller.connect_async()).await;
                 match joined {
                     Ok(Ok(_info)) => {
                         current_ssid.clear();
@@ -496,7 +510,11 @@ async fn wifi_task(mut controller: WifiController<'static>, stack: NetStack<'sta
                 let ssid = core::str::from_utf8(&current_ssid).unwrap_or("-");
 
                 let mut line = Line::new();
-                let _ = write!(line, "OK STATUS wifi={}", if connected { "up" } else { "down" });
+                let _ = write!(
+                    line,
+                    "OK STATUS wifi={}",
+                    if connected { "up" } else { "down" }
+                );
                 match address {
                     Some(address) => {
                         let _ = write!(line, " ip={}", address);
@@ -514,11 +532,7 @@ async fn wifi_task(mut controller: WifiController<'static>, stack: NetStack<'sta
                         let _ = write!(line, " rssi=-");
                     }
                 }
-                let _ = write!(
-                    line,
-                    " led={}",
-                    LED_STATE.load(Ordering::Relaxed)
-                );
+                let _ = write!(line, " led={}", LED_STATE.load(Ordering::Relaxed));
                 let _ = resp_tx.send(line).await;
             }
 
