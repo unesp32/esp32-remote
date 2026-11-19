@@ -57,6 +57,7 @@ Export the whole workspace as JSON (or reset it) from the **Settings** tab.
 | --------------- | ------------------------------------------------------------------- |
 | `firmware/`     | Rust firmware for the ESP32-S3 (`no_std`, Xtensa target)           |
 | `web/`          | Cloudflare Worker + D1 backend and the browser app (Vite bundled)   |
+| `scripts/`      | Verification tools: API smoke test and BLE over-the-air scan        |
 | `.github/`      | Issue templates, PR template, CI and deploy workflows               |
 
 ## Branch model
@@ -88,6 +89,22 @@ cargo run --release               # espflash flash --monitor
 env -u RUSTUP_TOOLCHAIN cargo build --release
 ```
 
+### Verify the board is really on the air
+
+`cargo run` printing an advertising loop only proves the controller accepted the
+command. To prove a frame left the antenna, scan for it:
+
+```sh
+python3 -m pip install bleak
+python3 scripts/ble_scan.py            # looks for the "esp32-remote" name
+python3 scripts/ble_scan.py --connect  # also connects and lists GATT services
+```
+
+Run it from **Terminal.app** (or any app granted Bluetooth access): macOS gives
+Bluetooth permission to the *responsible process*, so a sandboxed or
+permission-less parent process hangs without ever seeing a device. The board
+must be plugged in over USB — an unplugged board obviously advertises nothing.
+
 ## Website quickstart
 
 ```sh
@@ -110,6 +127,11 @@ Custom domain `esp.virt.cc.cd` is attached to the Worker on the `virt.cc.cd` zon
 | Name               | Where                    | Used for                                   |
 | ------------------ | ------------------------ | ------------------------------------------ |
 | `CLOUDFLARE_API_TOKEN` | CI secret / your shell | Deploying the Worker and D1                |
+| `CLOUDFLARE_ACCOUNT_ID` | CI secret / your shell | The account the Worker and D1 live in      |
+
+Both are set as repository secrets, so the `Deploy` workflow runs without any
+local login. The token is scoped to Workers Scripts/Editor, D1, Workers
+Observability and Workers Routes (zone `virt.cc.cd`) — nothing else.
 
 D1 database `esp32-remote` is declared in `web/cloudflare.config.ts` and provisioned
 automatically on first deploy; the binding is `env.DB`.

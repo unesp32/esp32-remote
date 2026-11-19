@@ -85,6 +85,12 @@ Then verify on https://esp.virt.cc.cd that:
 - Wi-Fi scanning and provisioning still work,
 - history and settings survive a reload.
 
+With the board plugged in, confirm it is actually advertising:
+
+```sh
+python3 scripts/ble_scan.py            # run from Terminal.app (Bluetooth permission)
+```
+
 ## Protocol contract
 
 The line protocol and the GATT surface are shared between firmware and browser.

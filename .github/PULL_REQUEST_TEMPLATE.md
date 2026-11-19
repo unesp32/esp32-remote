@@ -51,6 +51,7 @@ Grammar / verbs before and after:
 - [ ] `python3 scripts/smoke_api.py <base-url>` passes
 - [ ] `cargo build --release` passes
 - [ ] Flashed and booted on real hardware
+- [ ] `python3 scripts/ble_scan.py` still finds `esp32-remote`
 - [ ] Verified on https://esp.virt.cc.cd
 
 Steps:
