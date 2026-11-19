@@ -185,3 +185,171 @@ export async function resetWorkspace(): Promise<void> {
 
   refreshAll();
 }
+
+/* ------------------------------------------------------------- network tools */
+
+export interface DnsAnswer {
+  name: string;
+  type: number;
+  TTL: number;
+  data: string;
+}
+
+export interface DnsLookupResult {
+  status: number;
+  statusName: string;
+  domain: string;
+  type: string;
+  elapsedMs: number;
+  resolver: string;
+  answers: DnsAnswer[];
+  raw: any;
+}
+
+export async function performDnsLookup(domain: string, type = "A"): Promise<DnsLookupResult> {
+  const cleanDomain = domain.trim().replace(/^https?:\/\//, "").split("/")[0] ?? "virt.cc.cd";
+  const start = Date.now();
+  const res = await fetch(
+    `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(cleanDomain)}&type=${encodeURIComponent(type)}`,
+    {
+      headers: { Accept: "application/dns-json" },
+      cache: "no-store",
+    },
+  );
+  const elapsedMs = Date.now() - start;
+  const data = (await res.json()) as any;
+
+  const STATUS_MAP: Record<number, string> = {
+    0: "NOERROR",
+    1: "FORMERR",
+    2: "SERVFAIL",
+    3: "NXDOMAIN",
+    4: "NOTIMP",
+    5: "REFUSED",
+  };
+
+  return {
+    status: data.Status ?? 0,
+    statusName: STATUS_MAP[data.Status] || `STATUS_${data.Status}`,
+    domain: cleanDomain,
+    type,
+    elapsedMs,
+    resolver: "1.1.1.1 (Cloudflare DoH)",
+    answers: (data.Answer as DnsAnswer[]) || [],
+    raw: data,
+  };
+}
+
+export interface IpLookupResult {
+  ip: string;
+  type: string;
+  asn?: string;
+  org?: string;
+  isp?: string;
+  country?: string;
+  countryCode?: string;
+  city?: string;
+  region?: string;
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+  elapsedMs: number;
+}
+
+export async function performIpLookup(query: string): Promise<IpLookupResult> {
+  const cleanQuery = (query.trim().replace(/^https?:\/\//, "").split("/")[0] ?? "").split(":")[0] ?? "1.1.1.1";
+  const start = Date.now();
+  const res = await fetch(`https://ipwhois.app/json/${encodeURIComponent(cleanQuery)}`, {
+    cache: "no-store",
+  });
+  const elapsedMs = Date.now() - start;
+  const data = (await res.json()) as any;
+
+  return {
+    ip: data.ip || cleanQuery,
+    type: data.type || "IPv4",
+    asn: data.asn || "—",
+    org: data.org || "—",
+    isp: data.isp || "—",
+    country: data.country || "—",
+    countryCode: data.country_code || "—",
+    city: data.city || "—",
+    region: data.region || "—",
+    latitude: data.latitude,
+    longitude: data.longitude,
+    timezone: data.timezone || "—",
+    elapsedMs,
+  };
+}
+
+export interface HttpCheckResult {
+  url: string;
+  status: number;
+  statusText: string;
+  elapsedMs: number;
+  headers: Record<string, string>;
+  protocol: string;
+  bodyPreview: string;
+  contentLength?: number;
+}
+
+export async function performHttpCheck(targetUrl: string, method = "GET"): Promise<HttpCheckResult> {
+  let url = targetUrl.trim();
+  if (!/^https?:\/\//i.test(url)) {
+    url = `https://${url}`;
+  }
+
+  const start = Date.now();
+  const res = await fetch(url, {
+    method: method.toUpperCase(),
+    headers: {
+      "User-Agent": "ESP32-Remote-Prober/1.0 (+https://esp.virt.cc.cd)",
+    },
+    redirect: "follow",
+    cache: "no-store",
+  });
+  const elapsedMs = Date.now() - start;
+
+  const headers: Record<string, string> = {};
+  res.headers.forEach((val, key) => {
+    headers[key] = val;
+  });
+
+  const text = await res.text();
+  const preview = text.slice(0, 1500);
+
+  return {
+    url,
+    status: res.status,
+    statusText: res.statusText || (res.status === 200 ? "OK" : ""),
+    elapsedMs,
+    headers,
+    protocol: res.url.startsWith("https") ? "HTTPS (TLS)" : "HTTP",
+    bodyPreview: preview,
+    contentLength: text.length,
+  };
+}
+
+export interface EdgeStorageStats {
+  devicesCount: number;
+  profilesCount: number;
+  historyCount: number;
+  settingsCount: number;
+  database: string;
+  schemaVersion: number;
+  ownerId: string;
+}
+
+export async function getEdgeStorageStats(): Promise<EdgeStorageStats> {
+  const { store, identity } = await getRequestContext();
+  const stats = await store.stats(identity.id);
+  return {
+    devicesCount: stats.devices,
+    profilesCount: stats.wifiProfiles,
+    historyCount: stats.historyEntries,
+    settingsCount: stats.settings,
+    database: "esp32-remote (Cloudflare D1 SQLite)",
+    schemaVersion: 1,
+    ownerId: identity.id,
+  };
+}

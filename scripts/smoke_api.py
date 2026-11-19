@@ -29,21 +29,28 @@ def request(method, path, body=None):
 
 def call_cookie(method, path, body=None, expect=200):
     """Perform a request, record failures, and capture any `Set-Cookie` sent."""
-    req = request(method, path, body)
-    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor())
-    try:
-        with opener.open(req, timeout=30) as res:
-            status, raw_body = res.status, res.read()
-            raw = res.headers.get_all("Set-Cookie") or []
-    except urllib.error.HTTPError as err:
-        status, raw_body = err.code, err.read()
-        raw = err.headers.get_all("Set-Cookie") or []
+    for attempt in range(3):
+        req = request(method, path, body)
+        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor())
+        try:
+            with opener.open(req, timeout=30) as res:
+                status, raw_body = res.status, res.read()
+                raw = res.headers.get_all("Set-Cookie") or []
+        except urllib.error.HTTPError as err:
+            status, raw_body = err.code, err.read()
+            raw = err.headers.get_all("Set-Cookie") or []
 
-    # Cloudflare may answer non-JSON (e.g. a challenge page) — never crash on it.
-    try:
-        payload = json.loads(raw_body or b"{}")
-    except ValueError:
-        payload = {"_raw": raw_body[:200].decode("utf-8", "replace")}
+        # Cloudflare may answer non-JSON (e.g. a challenge page) — never crash on it.
+        try:
+            payload = json.loads(raw_body or b"{}")
+        except ValueError:
+            payload = {"_raw": raw_body[:200].decode("utf-8", "replace")}
+
+        # Handle temporary D1 free-tier concurrency load spikes with automatic backoff
+        if status == 500 and "too much load on D1 DBs" in str(payload) and attempt < 2:
+            time.sleep(1.5)
+            continue
+        break
 
     for cookie in raw:
         pair = cookie.split(";")[0]

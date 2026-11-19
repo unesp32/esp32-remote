@@ -156,6 +156,72 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   Progress Bar (Modern Web Guidance Compliant)
+   -------------------------------------------------------------------------- */
+progress.cf-progress {
+  appearance: none;
+  border: 0 solid;
+  overflow: clip;
+  height: 8px;
+  width: 100%;
+  --progress-bar-radius: 9999px;
+  border-radius: var(--progress-bar-radius);
+  background: var(--cf-inset);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+progress.cf-progress::-webkit-progress-bar {
+  background: transparent;
+}
+progress.cf-progress::-webkit-progress-value {
+  background: var(--cf-orange);
+  border-radius: var(--progress-bar-radius);
+  transition: inline-size 0.3s ease;
+}
+progress.cf-progress::-moz-progress-bar {
+  background: var(--cf-orange);
+  border-radius: var(--progress-bar-radius);
+  transition: inline-size 0.3s ease;
+}
+progress.cf-progress.purple::-webkit-progress-value {
+  background: #a855f7;
+}
+progress.cf-progress.purple::-moz-progress-bar {
+  background: #a855f7;
+}
+progress.cf-progress.emerald::-webkit-progress-value {
+  background: #10b981;
+}
+progress.cf-progress.emerald::-moz-progress-bar {
+  background: #10b981;
+}
+progress.cf-progress.sky::-webkit-progress-value {
+  background: #0284c7;
+}
+progress.cf-progress.sky::-moz-progress-bar {
+  background: #0284c7;
+}
+
+/* --------------------------------------------------------------------------
+   Cloudflare Analytics SVG Chart
+   -------------------------------------------------------------------------- */
+.cf-analytics-chart {
+  width: 100%;
+  height: 110px;
+  overflow: visible;
+}
+.cf-chart-grid line {
+  stroke: var(--cf-border);
+  stroke-dasharray: 2 4;
+}
+.cf-chart-line {
+  fill: none;
+  stroke: var(--cf-orange);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --------------------------------------------------------------------------
    1. Cloudflare Global Header (Top Navigation Bar)
    -------------------------------------------------------------------------- */
 .cf-global-nav {
