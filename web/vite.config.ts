@@ -1,4 +1,5 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import vinext from "vinext";
 
@@ -14,6 +15,7 @@ import vinext from "vinext";
  */
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     vinext(),
     // The Worker entry runs in the RSC environment, with SSR as a child —
     // that split is what makes `cloudflare:workers` (and therefore the D1

@@ -1,5 +1,8 @@
 "use client";
 
+import "@cloudflare/kumo/styles/standalone";
+import "../globals.css";
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@cloudflare/kumo/components/button";
 import { Badge } from "@cloudflare/kumo/components/badge";
@@ -19,11 +22,14 @@ import {
   Plus,
   ArrowClockwise,
   Lightning,
-  CheckCircle,
-  XCircle,
   Eye,
   EyeSlash,
   PaperPlaneRight,
+  ShieldCheck,
+  Broadcast,
+  CheckCircle,
+  Warning,
+  Power,
 } from "@phosphor-icons/react";
 
 import {
@@ -37,7 +43,6 @@ import {
   parseLine,
   classify,
   type ParsedLine,
-  type LedAction,
 } from "../../src/protocol";
 
 import type { Device, WifiProfile, HistoryEntry } from "../../src/db";
@@ -79,13 +84,14 @@ export function Dashboard({
   initialProfiles,
   initialHistory,
 }: DashboardProps) {
-  // --- Bluetooth Connection State ---
+  // --- Bluetooth State ---
   const [bluetoothSupported, setBluetoothSupported] = useState(true);
   const [connecting, setConnecting] = useState(false);
   const [connected, setConnected] = useState(false);
   const [activeTab, setActiveTab] = useState("console");
+  const [acceptAllDevices, setAcceptAllDevices] = useState(false);
 
-  // Device & Live State
+  // Device & Telemetry State
   const [deviceInfo, setDeviceInfo] = useState({
     name: "esp32-remote",
     chip: "esp32s3",
@@ -98,12 +104,12 @@ export function Dashboard({
     led: "0",
   });
 
-  // GATT Handles
+  // GATT Refs
   const deviceRef = useRef<any>(null);
   const controlCharRef = useRef<any>(null);
   const statusCharRef = useRef<any>(null);
 
-  // Command Waiter
+  // In-flight command tracking
   const pendingCommandRef = useRef<{
     command: string;
     resolve: (res: ParsedLine) => void;
@@ -111,19 +117,19 @@ export function Dashboard({
     timer: any;
   } | null>(null);
 
-  // --- Console Logs ---
+  // Console Logs
   const [logs, setLogs] = useState<LogEntry[]>([
     {
       id: "init",
       time: new Date().toLocaleTimeString(),
       dir: "sys",
-      text: "esp32-remote dashboard ready. Connect via Web Bluetooth above.",
+      text: "esp32-remote control dashboard ready. Click 'Connect ESP32' to begin.",
     },
   ]);
   const [commandInput, setCommandInput] = useState("");
   const consoleBottomRef = useRef<HTMLDivElement>(null);
 
-  // --- Wi-Fi Scanner ---
+  // Wi-Fi Scanner & Provisioning
   const [scanning, setScanning] = useState(false);
   const [scanResults, setScanResults] = useState<DiscoveredAp[]>([]);
   const [joinSsid, setJoinSsid] = useState("");
@@ -131,7 +137,7 @@ export function Dashboard({
   const [showPass, setShowPass] = useState(false);
   const [joining, setJoining] = useState(false);
 
-  // --- Saved Profiles, Devices, History ---
+  // Saved Data
   const [devices, setDevices] = useState<Device[]>(initialDevices);
   const [profiles, setProfiles] = useState<WifiProfile[]>(initialProfiles);
   const [history, setHistory] = useState<HistoryEntry[]>(initialHistory);
@@ -140,7 +146,7 @@ export function Dashboard({
   const [newSsid, setNewSsid] = useState("");
   const [newPass, setNewPass] = useState("");
 
-  // Check Web Bluetooth support on mount
+  // Check browser capability on mount
   useEffect(() => {
     if (typeof navigator === "undefined" || !("bluetooth" in navigator)) {
       setBluetoothSupported(false);
@@ -162,6 +168,15 @@ export function Dashboard({
     setLogs((prev) => [...prev.slice(-300), entry]);
   }, []);
 
+  // Format MAC address with colons if needed
+  const formatMac = (raw: string) => {
+    const clean = raw.replace(/[^0-9a-fA-F]/g, "").toLowerCase();
+    if (clean.length === 12) {
+      return clean.match(/.{1,2}/g)?.join(":") || raw;
+    }
+    return raw;
+  };
+
   // --- Line Parser & Event Dispatcher ---
   const handleIncomingLine = useCallback(
     (raw: string) => {
@@ -174,12 +189,14 @@ export function Dashboard({
         addLog(parsed.verb === "ERR" ? "err" : "rx", parsed.raw);
       }
 
-      // Check if this fulfills an in-flight command
+      // Resolve pending command promise
       if (pendingCommandRef.current) {
         const { command, resolve, timer } = pendingCommandRef.current;
         const isFinal =
           parsed.verb === "ERR" ||
-          (command === "SCAN" ? parsed.verb === "OK" && parsed.tail.startsWith("SCAN_DONE") : parsed.verb === "OK");
+          (command === "SCAN"
+            ? parsed.verb === "OK" && parsed.tail.startsWith("SCAN_DONE")
+            : parsed.verb === "OK");
 
         if (isFinal) {
           clearTimeout(timer);
@@ -188,14 +205,14 @@ export function Dashboard({
         }
       }
 
-      // Update state based on messages
+      // Handle INFO response
       if (parsed.verb === "OK" && parsed.tail.startsWith("INFO")) {
         setDeviceInfo((prev) => ({
           ...prev,
           name: parsed.fields.name || prev.name,
           chip: parsed.fields.chip || prev.chip,
           fw: parsed.fields.fw || prev.fw,
-          mac: parsed.fields.mac || prev.mac,
+          mac: parsed.fields.mac ? formatMac(parsed.fields.mac) : prev.mac,
         }));
 
         if (parsed.fields.mac) {
@@ -213,6 +230,7 @@ export function Dashboard({
         }
       }
 
+      // Handle STATUS response
       if (parsed.verb === "OK" && parsed.tail.startsWith("STATUS")) {
         setDeviceInfo((prev) => ({
           ...prev,
@@ -224,11 +242,13 @@ export function Dashboard({
         }));
       }
 
+      // Handle LED state update
       if (parsed.verb === "OK" && parsed.tail.startsWith("LED")) {
         const val = parsed.tail.replace("LED ", "").trim();
         setDeviceInfo((prev) => ({ ...prev, led: val }));
       }
 
+      // Handle Wi-Fi Access Point scan result
       if (kind === "scan-result") {
         const ap: DiscoveredAp = {
           ssid: parsed.fields.ssid || parsed.tail.replace(/^ssid=/, ""),
@@ -244,10 +264,10 @@ export function Dashboard({
 
       if (kind === "scan-done") {
         setScanning(false);
-        addLog("sys", "Wi-Fi scan completed.");
+        addLog("sys", `Wi-Fi scan completed. Discovered ${scanResults.length} access point(s).`);
       }
     },
-    [addLog],
+    [addLog, scanResults.length],
   );
 
   // --- Send Command Over BLE ---
@@ -287,7 +307,7 @@ export function Dashboard({
 
       const res = await promise;
 
-      // Log to database
+      // Persist to Cloudflare D1
       void recordHistory({
         command: commandStr,
         response: res.raw,
@@ -309,20 +329,31 @@ export function Dashboard({
         deviceRef.current.gatt.disconnect();
       }
       setConnected(false);
+      controlCharRef.current = null;
+      statusCharRef.current = null;
       addLog("sys", "Disconnected from ESP32.");
       return;
     }
 
     setConnecting(true);
-    addLog("sys", "Requesting Bluetooth device...");
+    addLog("sys", "Opening Web Bluetooth device chooser...");
 
     try {
-      const device = await (navigator as any).bluetooth.requestDevice({
-        filters: [{ namePrefix: DEVICE_NAME_PREFIX }],
-        optionalServices: [SERVICE_UUID],
-      });
+      const requestOptions: any = acceptAllDevices
+        ? { acceptAllDevices: true, optionalServices: [SERVICE_UUID] }
+        : {
+            filters: [
+              { namePrefix: DEVICE_NAME_PREFIX },
+              { namePrefix: "esp32" },
+              { namePrefix: "ESP32" },
+              { services: [SERVICE_UUID] },
+            ],
+            optionalServices: [SERVICE_UUID],
+          };
 
-      addLog("sys", `Connecting to GATT server on ${device.name || "ESP32"}...`);
+      const device = await (navigator as any).bluetooth.requestDevice(requestOptions);
+
+      addLog("sys", `Connecting to GATT server on '${device.name || "ESP32"}'...`);
       device.addEventListener("gattserverdisconnected", () => {
         setConnected(false);
         controlCharRef.current = null;
@@ -331,11 +362,16 @@ export function Dashboard({
       });
 
       const server = await device.gatt.connect();
-      addLog("sys", "Discovering primary service...");
+      addLog("sys", "Accessing primary GATT service...");
       const service = await server.getPrimaryService(SERVICE_UUID);
 
       const control = await service.getCharacteristic(CONTROL_UUID);
-      const statusChar = await service.getCharacteristic(STATUS_UUID);
+      let statusChar: any = null;
+      try {
+        statusChar = await service.getCharacteristic(STATUS_UUID);
+      } catch (e) {
+        console.warn("Status characteristic not present or skipped", e);
+      }
 
       const onNotify = (event: any) => {
         const val = event.target.value;
@@ -347,25 +383,37 @@ export function Dashboard({
       };
 
       control.addEventListener("characteristicvaluechanged", onNotify);
-      statusChar.addEventListener("characteristicvaluechanged", onNotify);
+      await control.startNotifications().catch((e: any) => {
+        addLog("err", `Notification setup warning: ${e.message}`);
+      });
 
-      await control.startNotifications();
-      await statusChar.startNotifications();
+      if (statusChar) {
+        statusChar.addEventListener("characteristicvaluechanged", onNotify);
+        await statusChar.startNotifications().catch(() => {});
+      }
 
       deviceRef.current = device;
       controlCharRef.current = control;
       statusCharRef.current = statusChar;
       setConnected(true);
-      addLog("sys", "Connected! Querying device information...");
+      addLog("sys", "Connected! Handshake established.");
 
-      // Initial queries
-      await sendBleCommand(commands.info());
-      await sendBleCommand(commands.status());
+      // Safe initial telemetry queries
+      try {
+        await sendBleCommand(commands.info(), 3000);
+      } catch (e) {
+        console.warn("Initial info query timeout", e);
+      }
+      try {
+        await sendBleCommand(commands.status(), 3000);
+      } catch (e) {
+        console.warn("Initial status query timeout", e);
+      }
     } catch (err: any) {
       if (err.name !== "NotFoundError") {
         addLog("err", `Connection failed: ${err.message}`);
       } else {
-        addLog("sys", "Pairing dialog cancelled.");
+        addLog("sys", "Bluetooth device selection cancelled.");
       }
     } finally {
       setConnecting(false);
@@ -423,9 +471,9 @@ export function Dashboard({
       addLog("sys", `Provisioning ESP32 with Wi-Fi network '${joinSsid}'...`);
       await sendBleCommand(commands.join(joinSsid, joinPass), 25000);
       await sendBleCommand(commands.status());
-      addLog("sys", `Wi-Fi join sequence completed.`);
+      addLog("sys", `Wi-Fi join sequence complete.`);
 
-      // Also persist to Saved Profiles
+      // Persist to Saved Profiles
       await saveWifiProfile({ ssid: joinSsid, password: joinPass });
       const updatedProfiles: any = await fetch("/api/wifi-profiles").then((r) => r.json());
       if (updatedProfiles?.wifiProfiles) setProfiles(updatedProfiles.wifiProfiles);
@@ -448,22 +496,32 @@ export function Dashboard({
     }
   };
 
+  const renderRssiBars = (rssi: number) => {
+    const bars = rssi > -55 ? 4 : rssi > -70 ? 3 : rssi > -82 ? 2 : 1;
+    return (
+      <span className="signal-bars" title={`${rssi} dBm`}>
+        <span className={`signal-bar bar-1 ${bars >= 1 ? "active" : ""}`} />
+        <span className={`signal-bar bar-2 ${bars >= 2 ? "active" : ""}`} />
+        <span className={`signal-bar bar-3 ${bars >= 3 ? "active" : ""}`} />
+        <span className={`signal-bar bar-4 ${bars >= 4 ? "active" : ""}`} />
+      </span>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-kumo-base text-kumo-default font-sans antialiased p-4 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="app-container">
       {/* Top Navbar */}
-      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-kumo-fill">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-kumo-elevated border border-kumo-hairline flex items-center justify-center text-kumo-link shadow-sm">
-            <Cpu size={24} weight="duotone" />
+      <header className="app-header">
+        <div className="brand-wrapper">
+          <div className="brand-icon shadow-sm">
+            <Cpu size={26} weight="duotone" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold tracking-tight">esp32-remote</h1>
-              <Badge variant="outline" className="text-xs">
-                v0.2.0-kumo
-              </Badge>
-            </div>
-            <p className="text-xs text-kumo-subtle">
+            <h1 className="brand-title">
+              esp32-remote
+              <Badge variant="outline">v0.2.0-kumo</Badge>
+            </h1>
+            <p className="brand-subtitle">
               Web Bluetooth remote control &amp; Wi-Fi provisioning powered by Cloudflare
             </p>
           </div>
@@ -473,9 +531,13 @@ export function Dashboard({
           <Badge
             variant={connected ? "success" : connecting ? "warning" : "neutral"}
             appearance="dot"
-            className="text-xs font-mono"
+            className="font-mono text-xs"
           >
-            {connected ? `Connected · ${deviceInfo.name}` : connecting ? "Connecting..." : "Disconnected"}
+            {connected
+              ? `Connected · ${deviceInfo.name}`
+              : connecting
+                ? "Connecting..."
+                : "Disconnected"}
           </Badge>
 
           <Button
@@ -492,83 +554,96 @@ export function Dashboard({
 
       {/* Browser Warning */}
       {!bluetoothSupported && (
-        <Banner variant="error">
-          Web Bluetooth is not supported in this browser. Please open this page in Google Chrome,
-          Microsoft Edge, or Opera on macOS, Linux, Windows, or Android. Note that iOS Safari does
-          not support Web Bluetooth.
-        </Banner>
+        <div className="mb-4">
+          <Banner variant="error">
+            Web Bluetooth is not supported in this browser. Please open this page in Google Chrome,
+            Microsoft Edge, or Opera on macOS, Linux, Windows, or Android. Note that iOS Safari does
+            not support Web Bluetooth.
+          </Banner>
+        </div>
       )}
 
-      {/* Status Alert for BLE Pairing Note */}
-      <Banner variant="secondary" className="text-xs">
-        <strong>Bluetooth Note:</strong> Do NOT pair the ESP32 in macOS System Settings. Web Bluetooth
-        connects directly inside this browser tab via the button above. The firmware uses an unbonded LE
-        GATT server which requires no OS-level pin or pairing.
-      </Banner>
+      {/* Guidance Banner */}
+      <div className="mb-5">
+        <Banner variant="secondary">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
+            <span>
+              💡 <strong>How to connect:</strong> Click <strong>Connect ESP32</strong> above, choose{" "}
+              <code>esp32-remote</code> in the browser popup, and click Pair. Do <em>not</em> pair in
+              macOS System Settings.
+            </span>
+            <label className="inline-flex items-center gap-1.5 cursor-pointer select-none text-xs text-kumo-subtle shrink-0">
+              <input
+                type="checkbox"
+                checked={acceptAllDevices}
+                onChange={(e) => setAcceptAllDevices(e.target.checked)}
+                className="rounded border-kumo-hairline"
+              />
+              Show all Bluetooth devices
+            </label>
+          </div>
+        </Banner>
+      </div>
 
-      {/* Live Device Telemetry Card */}
-      <section className="bg-kumo-elevated rounded-xl border border-kumo-hairline p-5 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-kumo-hairline pb-3">
-          <div className="flex items-center gap-2">
-            <Cpu size={18} className="text-kumo-link" />
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-kumo-subtle">
-              Hardware Telemetry
-            </h2>
+      {/* Telemetry Card */}
+      <section className="telemetry-card">
+        <div className="card-header">
+          <div className="card-title">
+            <Broadcast size={16} className="text-kumo-link" />
+            Hardware Telemetry
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleStatus}
-              disabled={!connected}
-              className="flex items-center gap-1.5"
-            >
-              <ArrowClockwise size={13} /> Refresh
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleStatus}
+            disabled={!connected}
+            className="flex items-center gap-1.5"
+          >
+            <ArrowClockwise size={13} /> Refresh
+          </Button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="space-y-1">
-            <span className="text-xs text-kumo-subtle">Device Name</span>
-            <p className="text-sm font-mono font-medium truncate">{deviceInfo.name}</p>
+        <div className="telemetry-grid">
+          <div className="stat-item">
+            <span className="stat-label">Device Name</span>
+            <span className="stat-value truncate">{deviceInfo.name}</span>
           </div>
-          <div className="space-y-1">
-            <span className="text-xs text-kumo-subtle">Chip / Model</span>
-            <p className="text-sm font-mono font-medium">{deviceInfo.chip}</p>
+          <div className="stat-item">
+            <span className="stat-label">Chip / Target</span>
+            <span className="stat-value">{deviceInfo.chip}</span>
           </div>
-          <div className="space-y-1">
-            <span className="text-xs text-kumo-subtle">Firmware</span>
-            <p className="text-sm font-mono font-medium">{deviceInfo.fw}</p>
+          <div className="stat-item">
+            <span className="stat-label">Firmware</span>
+            <span className="stat-value">{deviceInfo.fw}</span>
           </div>
-          <div className="space-y-1">
-            <span className="text-xs text-kumo-subtle">MAC Address</span>
-            <p className="text-sm font-mono font-medium">{deviceInfo.mac}</p>
+          <div className="stat-item">
+            <span className="stat-label">MAC Address</span>
+            <span className="stat-value text-kumo-link">{deviceInfo.mac}</span>
           </div>
-          <div className="space-y-1">
-            <span className="text-xs text-kumo-subtle">Wi-Fi Status</span>
+          <div className="stat-item">
+            <span className="stat-label">Wi-Fi Status</span>
             <div className="flex items-center gap-1.5">
               <span
                 className={`w-2 h-2 rounded-full ${
-                  deviceInfo.wifi === "up" ? "bg-emerald-500 animate-pulse" : "bg-neutral-500"
+                  deviceInfo.wifi === "up" ? "bg-emerald-500 animate-pulse" : "bg-neutral-600"
                 }`}
               />
-              <span className="text-sm font-mono font-medium">
+              <span className="stat-value">
                 {deviceInfo.wifi === "up" ? deviceInfo.ip : "Disconnected"}
               </span>
             </div>
           </div>
-          <div className="space-y-1">
-            <span className="text-xs text-kumo-subtle">Status LED</span>
+          <div className="stat-item">
+            <span className="stat-label">Status LED</span>
             <Badge variant={deviceInfo.led === "1" ? "success" : "neutral"}>
-              {deviceInfo.led === "1" ? "ON" : "OFF"}
+              {deviceInfo.led === "1" ? "ON (GPIO48)" : "OFF"}
             </Badge>
           </div>
         </div>
 
-        {/* Quick Actions Row */}
-        <div className="pt-2 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-kumo-subtle mr-2">Quick Actions:</span>
+        {/* Quick Actions Toolbar */}
+        <div className="actions-toolbar">
+          <span className="text-xs font-semibold text-kumo-subtle mr-1">Quick Actions:</span>
           <Button variant="outline" size="sm" onClick={handlePing} disabled={!connected}>
             <Lightning size={14} className="mr-1 text-amber-400" /> PING
           </Button>
@@ -579,27 +654,74 @@ export function Dashboard({
             STATUS
           </Button>
           <Button variant="outline" size="sm" onClick={handleToggleLed} disabled={!connected}>
-            Toggle LED
+            <Power size={14} className="mr-1 text-emerald-400" /> Toggle LED
           </Button>
-          <Button variant="outline" size="sm" onClick={handleScanWifi} disabled={!connected || scanning}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleScanWifi}
+            disabled={!connected || scanning}
+          >
             <WifiHigh size={14} className="mr-1 text-sky-400" />
             {scanning ? "Scanning APs..." : "Scan Wi-Fi"}
           </Button>
         </div>
       </section>
 
-      {/* Main Tabs Navigation */}
-      <section className="bg-kumo-elevated rounded-xl border border-kumo-hairline overflow-hidden shadow-sm">
-        <div className="p-3 border-b border-kumo-hairline bg-kumo-base">
+      {/* Main Tabbed Panel */}
+      <section className="panel-card">
+        <div className="panel-tabs-bar">
           <Tabs
             variant="segmented"
             tabs={[
-              { value: "console", label: <span className="flex items-center gap-1.5"><Terminal size={15} /> Console</span> },
-              { value: "wifi", label: <span className="flex items-center gap-1.5"><WifiHigh size={15} /> Wi-Fi Setup</span> },
-              { value: "profiles", label: <span className="flex items-center gap-1.5"><HardDrives size={15} /> Saved Profiles ({profiles.length})</span> },
-              { value: "devices", label: <span className="flex items-center gap-1.5"><Cpu size={15} /> Devices ({devices.length})</span> },
-              { value: "history", label: <span className="flex items-center gap-1.5"><ClockCounterClockwise size={15} /> History ({history.length})</span> },
-              { value: "settings", label: <span className="flex items-center gap-1.5"><Gear size={15} /> Settings</span> },
+              {
+                value: "console",
+                label: (
+                  <span className="flex items-center gap-1.5">
+                    <Terminal size={15} /> Console
+                  </span>
+                ),
+              },
+              {
+                value: "wifi",
+                label: (
+                  <span className="flex items-center gap-1.5">
+                    <WifiHigh size={15} /> Wi-Fi Setup
+                  </span>
+                ),
+              },
+              {
+                value: "profiles",
+                label: (
+                  <span className="flex items-center gap-1.5">
+                    <HardDrives size={15} /> Saved Profiles ({profiles.length})
+                  </span>
+                ),
+              },
+              {
+                value: "devices",
+                label: (
+                  <span className="flex items-center gap-1.5">
+                    <Cpu size={15} /> Devices ({devices.length})
+                  </span>
+                ),
+              },
+              {
+                value: "history",
+                label: (
+                  <span className="flex items-center gap-1.5">
+                    <ClockCounterClockwise size={15} /> History ({history.length})
+                  </span>
+                ),
+              },
+              {
+                value: "settings",
+                label: (
+                  <span className="flex items-center gap-1.5">
+                    <Gear size={15} /> Settings &amp; Help
+                  </span>
+                ),
+              },
             ]}
             value={activeTab}
             onValueChange={setActiveTab}
@@ -608,35 +730,23 @@ export function Dashboard({
 
         {/* Tab 1: Terminal Console */}
         {activeTab === "console" && (
-          <div className="p-4 space-y-4">
+          <div className="panel-body space-y-4">
             <div className="flex items-center justify-between text-xs text-kumo-subtle">
-              <span>Interactive GATT Line Protocol Session</span>
+              <span>GATT Line Protocol Session · 240-byte MTU frame</span>
               <Button variant="ghost" size="xs" onClick={() => setLogs([])}>
                 Clear Console
               </Button>
             </div>
 
-            <div className="bg-neutral-950 text-neutral-100 rounded-lg p-4 font-mono text-xs h-80 overflow-y-auto space-y-1 border border-neutral-800">
+            <div className="terminal-window">
               {logs.map((log) => (
-                <div key={log.id} className="flex items-start gap-2 leading-relaxed">
-                  <span className="text-neutral-500 select-none">[{log.time}]</span>
-                  {log.dir === "tx" && <span className="text-cyan-400 font-bold select-none">&gt;&gt;</span>}
-                  {log.dir === "rx" && <span className="text-emerald-400 font-bold select-none">&lt;&lt;</span>}
-                  {log.dir === "sys" && <span className="text-purple-400 font-bold select-none">##</span>}
-                  {log.dir === "err" && <span className="text-rose-400 font-bold select-none">!!</span>}
-                  <span
-                    className={
-                      log.dir === "err"
-                        ? "text-rose-300"
-                        : log.dir === "tx"
-                          ? "text-cyan-200"
-                          : log.dir === "rx"
-                            ? "text-emerald-200"
-                            : "text-neutral-400"
-                    }
-                  >
-                    {log.text}
-                  </span>
+                <div key={log.id} className="terminal-line">
+                  <span className="terminal-time">[{log.time}]</span>
+                  {log.dir === "tx" && <span className="terminal-prefix-tx">&gt;&gt;</span>}
+                  {log.dir === "rx" && <span className="terminal-prefix-rx">&lt;&lt;</span>}
+                  {log.dir === "sys" && <span className="terminal-prefix-sys">##</span>}
+                  {log.dir === "err" && <span className="terminal-prefix-err">!!</span>}
+                  <span className={`terminal-text-${log.dir}`}>{log.text}</span>
                 </div>
               ))}
               <div ref={consoleBottomRef} />
@@ -650,28 +760,72 @@ export function Dashboard({
                 className="font-mono text-sm flex-1"
                 disabled={!connected}
               />
-              <Button type="submit" variant="primary" disabled={!connected || !commandInput.trim()}>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={!connected || !commandInput.trim()}
+              >
                 <PaperPlaneRight size={16} className="mr-1" /> Send
               </Button>
             </form>
+
+            <div className="flex items-center gap-2 flex-wrap text-xs text-kumo-subtle pt-1">
+              <span>Quick hints:</span>
+              <button
+                type="button"
+                className="hover:text-kumo-default underline font-mono"
+                onClick={() => setCommandInput("PING")}
+              >
+                PING
+              </button>
+              <button
+                type="button"
+                className="hover:text-kumo-default underline font-mono"
+                onClick={() => setCommandInput("INFO")}
+              >
+                INFO
+              </button>
+              <button
+                type="button"
+                className="hover:text-kumo-default underline font-mono"
+                onClick={() => setCommandInput("STATUS")}
+              >
+                STATUS
+              </button>
+              <button
+                type="button"
+                className="hover:text-kumo-default underline font-mono"
+                onClick={() => setCommandInput("LED TOGGLE")}
+              >
+                LED TOGGLE
+              </button>
+              <button
+                type="button"
+                className="hover:text-kumo-default underline font-mono"
+                onClick={() => setCommandInput("SCAN")}
+              >
+                SCAN
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Tab 2: Wi-Fi Scanner & Provisioning */}
+        {/* Tab 2: Wi-Fi Setup */}
         {activeTab === "wifi" && (
-          <div className="p-5 space-y-6">
-            <div className="flex items-center justify-between">
+          <div className="panel-body space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-base font-semibold">Over-The-Air Wi-Fi Provisioning</h3>
                 <p className="text-xs text-kumo-subtle">
-                  Scan for 2.4 GHz access points around the ESP32 and send credentials securely over BLE.
+                  Scan for 2.4 GHz access points around the ESP32 and send credentials securely over
+                  BLE.
                 </p>
               </div>
               <Button
                 variant="primary"
                 onClick={handleScanWifi}
                 disabled={!connected || scanning}
-                className="flex items-center gap-1.5"
+                className="flex items-center gap-1.5 shrink-0"
               >
                 <ArrowClockwise size={16} className={scanning ? "animate-spin" : ""} />
                 {scanning ? "Scanning Airwaves..." : "Scan Networks"}
@@ -702,19 +856,12 @@ export function Dashboard({
                   ) : (
                     scanResults.map((ap) => (
                       <Table.Row key={`${ap.ssid}-${ap.channel}`}>
-                        <Table.Cell className="font-medium">{ap.ssid || "<Hidden SSID>"}</Table.Cell>
+                        <Table.Cell className="font-medium">
+                          {ap.ssid || "<Hidden SSID>"}
+                        </Table.Cell>
                         <Table.Cell className="font-mono text-xs">
-                          <span
-                            className={
-                              ap.rssi > -60
-                                ? "text-emerald-500"
-                                : ap.rssi > -75
-                                  ? "text-amber-500"
-                                  : "text-rose-500"
-                            }
-                          >
-                            {ap.rssi} dBm
-                          </span>
+                          {renderRssiBars(ap.rssi)}
+                          {ap.rssi} dBm
                         </Table.Cell>
                         <Table.Cell className="font-mono text-xs">{ap.channel}</Table.Cell>
                         <Table.Cell className="text-xs">{ap.auth}</Table.Cell>
@@ -722,7 +869,10 @@ export function Dashboard({
                           <Button
                             variant="outline"
                             size="xs"
-                            onClick={() => setJoinSsid(ap.ssid)}
+                            onClick={() => {
+                              setJoinSsid(ap.ssid);
+                              addLog("sys", `Selected SSID '${ap.ssid}' in join form.`);
+                            }}
                           >
                             Use SSID
                           </Button>
@@ -736,7 +886,9 @@ export function Dashboard({
 
             {/* Provision Form */}
             <div className="bg-kumo-base p-5 rounded-lg border border-kumo-hairline space-y-4">
-              <h4 className="text-sm font-semibold">Join Network</h4>
+              <h4 className="text-sm font-semibold flex items-center gap-2">
+                <WifiHigh size={16} className="text-kumo-link" /> Join Wi-Fi Network
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs text-kumo-subtle">Network SSID</label>
@@ -784,7 +936,7 @@ export function Dashboard({
 
         {/* Tab 3: Saved Profiles (Stored in D1) */}
         {activeTab === "profiles" && (
-          <div className="p-5 space-y-6">
+          <div className="panel-body space-y-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-semibold">Cloudflare D1 Saved Profiles</h3>
@@ -889,7 +1041,7 @@ export function Dashboard({
 
         {/* Tab 4: Known Devices */}
         {activeTab === "devices" && (
-          <div className="p-5 space-y-4">
+          <div className="panel-body space-y-4">
             <h3 className="text-base font-semibold">Registered ESP32 Hardware</h3>
             <p className="text-xs text-kumo-subtle">
               Every connected board registers its MAC address and hardware specifications to D1.
@@ -947,7 +1099,7 @@ export function Dashboard({
 
         {/* Tab 5: Command History */}
         {activeTab === "history" && (
-          <div className="p-5 space-y-4">
+          <div className="panel-body space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-semibold">Command Audit History</h3>
@@ -993,9 +1145,7 @@ export function Dashboard({
                           {new Date(h.createdAt).toLocaleTimeString()}
                         </Table.Cell>
                         <Table.Cell>
-                          <Badge variant="outline">
-                            {h.direction}
-                          </Badge>
+                          <Badge variant="outline">{h.direction}</Badge>
                         </Table.Cell>
                         <Table.Cell className="font-mono text-xs text-cyan-400">
                           {h.command}
@@ -1017,10 +1167,10 @@ export function Dashboard({
           </div>
         )}
 
-        {/* Tab 6: Settings */}
+        {/* Tab 6: Settings & Help */}
         {activeTab === "settings" && (
-          <div className="p-5 space-y-6">
-            <h3 className="text-base font-semibold">Workspace Settings</h3>
+          <div className="panel-body space-y-6">
+            <h3 className="text-base font-semibold">Workspace Settings &amp; Troubleshooting</h3>
 
             <div className="bg-kumo-base p-4 rounded-lg border border-kumo-hairline space-y-2">
               <span className="text-xs text-kumo-subtle">Your Anonymous Workspace Identity</span>
@@ -1028,6 +1178,31 @@ export function Dashboard({
               <p className="text-xs text-kumo-subtle">
                 Every D1 database record is automatically partitioned by this UUID.
               </p>
+            </div>
+
+            <div className="bg-kumo-base p-4 rounded-lg border border-kumo-hairline space-y-3">
+              <h4 className="text-sm font-semibold flex items-center gap-1.5">
+                <ShieldCheck size={16} className="text-kumo-link" /> Web Bluetooth Troubleshooting
+              </h4>
+              <ul className="text-xs text-kumo-subtle space-y-1.5 list-disc list-inside">
+                <li>
+                  <strong>Supported Browsers:</strong> Google Chrome, Microsoft Edge, Opera on macOS,
+                  Linux, Windows, and Android. Safari (iOS/macOS) does <em>not</em> implement Web
+                  Bluetooth.
+                </li>
+                <li>
+                  <strong>No OS Pairing:</strong> Do not use macOS System Settings to pair. Standard
+                  BLE GATT servers only connect through browser tabs.
+                </li>
+                <li>
+                  <strong>One Central at a Time:</strong> The ESP32 allows only 1 simultaneous
+                  Bluetooth connection. Ensure no other script or tab is connected.
+                </li>
+                <li>
+                  <strong>Device Discovery:</strong> If <code>esp32-remote</code> is not visible in
+                  the chooser, check the <em>&quot;Show all Bluetooth devices&quot;</em> toggle above.
+                </li>
+              </ul>
             </div>
 
             <div className="pt-4 border-t border-kumo-hairline">

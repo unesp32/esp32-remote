@@ -169,6 +169,17 @@ async fn ble_task(controller: ExternalController<BleConnector<'static>, 1>, mac:
     )
     .unwrap();
 
+    // 128-bit Service UUID in little-endian byte order for the scan response packet.
+    let service_uuid_le: [u8; 16] = [
+        0x38, 0xcf, 0x62, 0x0a, 0xc3, 0xfb, 0x10, 0x9f, 0xeb, 0x11, 0x54, 0x23, 0xe0, 0x12, 0x73, 0x93,
+    ];
+    let mut scan_data = [0u8; 31];
+    let scan_len = AdStructure::encode_slice(
+        &[AdStructure::ServiceUuids128(&[service_uuid_le])],
+        &mut scan_data[..],
+    )
+    .unwrap();
+
     // GPIO outputs we have already claimed, keyed by pin number.
     let mut outputs: Vec<(u8, Output<'static>), MAX_PINS> = Vec::new();
 
@@ -180,7 +191,7 @@ async fn ble_task(controller: ExternalController<BleConnector<'static>, 1>, mac:
                     &params,
                     Advertisement::ConnectableScannableUndirected {
                         adv_data: &adv_data[..adv_len],
-                        scan_data: &[],
+                        scan_data: &scan_data[..scan_len],
                     },
                 )
                 .await;

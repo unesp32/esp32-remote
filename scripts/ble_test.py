@@ -35,7 +35,11 @@ async def run_ble_test(timeout: float) -> int:
 
     print(f"[*] Scanning for advertiser matching prefix '{NAME_PREFIX}' ({timeout:g}s)...")
     device = await BleakScanner.find_device_by_filter(
-        lambda d, adv: d.name and NAME_PREFIX in d.name.lower(),
+        lambda d, adv: (
+            (adv.local_name and NAME_PREFIX in adv.local_name.lower())
+            or (d.name and NAME_PREFIX in d.name.lower())
+            or (SERVICE_UUID.lower() in [s.lower() for s in (adv.service_uuids or [])])
+        ),
         timeout=timeout,
     )
 

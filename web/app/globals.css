@@ -1,0 +1,263 @@
+@import "tailwindcss";
+@import "@cloudflare/kumo/styles/standalone";
+
+/* ==========================================================================
+   esp32-remote — Core Layout & Custom Styling
+   ========================================================================== */
+
+:root {
+  --bg: #0b0f14;
+  --bg-elev: #11171f;
+  --bg-inset: #0e141b;
+  --border: #1e2833;
+  --border-strong: #2b3846;
+  --text: #e6edf5;
+  --text-dim: #93a4b8;
+  --text-faint: #64748b;
+
+  --accent: #38e08b;
+  --accent-dim: #1f9d5f;
+  --accent-contrast: #05231a;
+
+  --warn: #f5b544;
+  --danger: #ff6b6b;
+  --info: #58b6ff;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App Container */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+@media (min-width: 768px) {
+  .app-container {
+    padding: 2.5rem 2rem;
+  }
+}
+
+/* Header Navbar */
+.app-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .app-header {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.brand-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+
+.brand-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin: 0.15rem 0 0 0;
+}
+
+/* Status Cards & Telemetry */
+.telemetry-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.card-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .telemetry-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .telemetry-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+
+.stat-value {
+  font-size: 0.925rem;
+  font-family: var(--mono);
+  font-weight: 500;
+  color: var(--text);
+  word-break: break-all;
+}
+
+/* Quick Action Toolbar */
+.actions-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+}
+
+/* Main Content Panel */
+.panel-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.panel-tabs-bar {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-inset);
+}
+
+.panel-body {
+  padding: 1.25rem;
+}
+
+/* Terminal Console */
+.terminal-window {
+  background: #05080c;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.terminal-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  line-height: 1.45;
+}
+
+.terminal-time {
+  color: var(--text-faint);
+  user-select: none;
+  font-size: 0.75rem;
+}
+
+.terminal-prefix-tx { color: #38bdf8; font-weight: bold; }
+.terminal-prefix-rx { color: #34d399; font-weight: bold; }
+.terminal-prefix-sys { color: #c084fc; font-weight: bold; }
+.terminal-prefix-err { color: #f87171; font-weight: bold; }
+
+.terminal-text-tx { color: #bae6fd; }
+.terminal-text-rx { color: #a7f3d0; }
+.terminal-text-sys { color: #cbd5e1; }
+.terminal-text-err { color: #fca5a5; }
+
+/* Signal RSSI Indicator */
+.signal-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  margin-right: 4px;
+}
+
+.signal-bar {
+  width: 3px;
+  background: #2b3846;
+  border-radius: 1px;
+}
+
+.signal-bar.bar-1 { height: 4px; }
+.signal-bar.bar-2 { height: 7px; }
+.signal-bar.bar-3 { height: 10px; }
+.signal-bar.bar-4 { height: 14px; }
+
+.signal-bar.active {
+  background: var(--accent);
+}
