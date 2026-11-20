@@ -14,8 +14,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
         <meta name="color-scheme" content="light dark" />
-        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8fafc" />
-        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d121a" />
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fafafa" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#080808" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="ESP32 Remote" />
@@ -33,11 +33,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 const s = localStorage.getItem("color-scheme");
                 if (s === "light" || s === "dark") {
                   document.documentElement.setAttribute("data-theme", s);
+                  document.documentElement.setAttribute("data-mode", s);
                   const m = document.querySelector('meta[name="color-scheme"]');
                   if (m) m.content = s;
                 } else {
                   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-                  document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
+                  const res = prefersDark ? "dark" : "light";
+                  document.documentElement.setAttribute("data-theme", res);
+                  document.documentElement.setAttribute("data-mode", res);
                 }
               } catch (e) {}
 

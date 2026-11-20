@@ -7,52 +7,53 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   Light Mode Theme Tokens (Default)
+   Light Mode Theme Tokens (Default Kumo)
    -------------------------------------------------------------------------- */
 :root,
-[data-theme="light"] {
+[data-theme="light"],
+[data-mode="light"] {
   /* Cloudflare Brand Colors */
   --cf-orange: #f6821f;
   --cf-orange-hover: #ea7314;
   --cf-orange-active: #d9650b;
-  --cf-orange-glow: rgba(246, 130, 31, 0.2);
+  --cf-orange-glow: rgba(246, 130, 31, 0.16);
   --cf-orange-subtle: rgba(246, 130, 31, 0.08);
-  --cf-orange-border: rgba(246, 130, 31, 0.35);
+  --cf-orange-border: rgba(246, 130, 31, 0.28);
 
-  /* Surfaces */
-  --cf-bg: #f8fafc;
+  /* Kumo Surfaces (Light) */
+  --cf-bg: #fafafa;
   --cf-nav-bg: #ffffff;
   --cf-subnav-bg: #ffffff;
   --cf-card-bg: #ffffff;
-  --cf-card-elev: #f1f5f9;
-  --cf-inset: #f1f5f9;
+  --cf-card-elev: #f4f4f6;
+  --cf-inset: #f0f0f3;
   --cf-input-bg: #ffffff;
 
-  /* Borders */
-  --cf-border: #e2e8f0;
-  --cf-border-strong: #cbd5e1;
-  --cf-border-subtle: #f1f5f9;
+  /* Kumo Borders (Light) */
+  --cf-border: #e4e4e7;
+  --cf-border-strong: #d4d4d8;
+  --cf-border-subtle: #f0f0f3;
 
-  /* Typography */
-  --cf-text-strong: #0f172a;
-  --cf-text: #334155;
-  --cf-text-muted: #64748b;
-  --cf-text-faint: #94a3b8;
+  /* Kumo Typography (Light) */
+  --cf-text-strong: #09090b;
+  --cf-text: #18181b;
+  --cf-text-muted: #71717a;
+  --cf-text-faint: #a1a1aa;
 
   /* Status Tokens */
-  --cf-success: #059669;
-  --cf-success-bg: rgba(5, 150, 105, 0.1);
-  --cf-warning: #d97706;
-  --cf-warning-bg: rgba(217, 119, 6, 0.1);
-  --cf-danger: #dc2626;
-  --cf-danger-bg: rgba(220, 38, 38, 0.1);
-  --cf-info: #2563eb;
-  --cf-info-bg: rgba(37, 99, 235, 0.1);
+  --cf-success: #10b981;
+  --cf-success-bg: rgba(16, 185, 129, 0.1);
+  --cf-warning: #f59e0b;
+  --cf-warning-bg: rgba(245, 158, 11, 0.1);
+  --cf-danger: #ef4444;
+  --cf-danger-bg: rgba(239, 68, 68, 0.1);
+  --cf-info: #3b82f6;
+  --cf-info-bg: rgba(59, 130, 246, 0.1);
 
   /* Terminal Surface */
-  --cf-term-bg: #0b0f17;
-  --cf-term-header: #111724;
-  --cf-term-border: #1e293b;
+  --cf-term-bg: #09090b;
+  --cf-term-header: #121215;
+  --cf-term-border: #27272a;
 
   /* Common Properties */
   --radius-cf: 8px;
@@ -63,72 +64,86 @@
 }
 
 /* --------------------------------------------------------------------------
-   Dark Mode Theme Tokens
+   Dark Mode Theme Tokens (Default Kumo - Deep Jet Black, High Contrast)
    -------------------------------------------------------------------------- */
-[data-theme="dark"] {
-  --cf-bg: #0d121a;
-  --cf-nav-bg: #111722;
-  --cf-subnav-bg: #131b27;
-  --cf-card-bg: #16202e;
-  --cf-card-elev: #1a2638;
-  --cf-inset: #090e15;
-  --cf-input-bg: #0d1420;
+[data-theme="dark"],
+[data-mode="dark"] {
+  /* Cloudflare Brand Colors */
+  --cf-orange: #f6821f;
+  --cf-orange-hover: #ea7314;
+  --cf-orange-active: #d9650b;
+  --cf-orange-glow: rgba(246, 130, 31, 0.25);
+  --cf-orange-subtle: rgba(246, 130, 31, 0.12);
+  --cf-orange-border: rgba(246, 130, 31, 0.38);
 
-  --cf-border: #222f42;
-  --cf-border-strong: #2f4057;
-  --cf-border-subtle: #192433;
+  /* Kumo Surfaces (Dark - deep black, strictly neutral) */
+  --cf-bg: #080808;
+  --cf-nav-bg: #0e0e10;
+  --cf-subnav-bg: #0e0e10;
+  --cf-card-bg: #121214;
+  --cf-card-elev: #17171a;
+  --cf-inset: #1a1a1d;
+  --cf-input-bg: #141416;
 
-  --cf-text-strong: #f8fafc;
-  --cf-text: #e2e8f0;
-  --cf-text-muted: #8b9cb0;
-  --cf-text-faint: #5a6e85;
+  /* Kumo Borders (Dark - pure neutral greys) */
+  --cf-border: #262629;
+  --cf-border-strong: #36363a;
+  --cf-border-subtle: #1c1c1f;
 
+  /* Kumo Typography (Dark - pure high contrast) */
+  --cf-text-strong: #fafafa;
+  --cf-text: #e4e4e7;
+  --cf-text-muted: #8e8e93;
+  --cf-text-faint: #5a5a60;
+
+  /* Status Tokens */
   --cf-success: #10b981;
-  --cf-success-bg: rgba(16, 185, 129, 0.12);
+  --cf-success-bg: rgba(16, 185, 129, 0.14);
   --cf-warning: #f59e0b;
-  --cf-warning-bg: rgba(245, 158, 11, 0.12);
+  --cf-warning-bg: rgba(245, 158, 11, 0.14);
   --cf-danger: #ef4444;
-  --cf-danger-bg: rgba(239, 68, 68, 0.12);
+  --cf-danger-bg: rgba(239, 68, 68, 0.14);
   --cf-info: #3b82f6;
-  --cf-info-bg: rgba(59, 130, 246, 0.12);
+  --cf-info-bg: rgba(59, 130, 246, 0.14);
 
-  --cf-term-bg: #06090e;
-  --cf-term-header: #0a0f16;
-  --cf-term-border: #222f42;
+  /* Terminal Surface */
+  --cf-term-bg: #040405;
+  --cf-term-header: #0a0a0c;
+  --cf-term-border: #222225;
 }
 
 /* Automatic System Adaptation when no manual override */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]):not([data-theme="dark"]) {
-    --cf-bg: #0d121a;
-    --cf-nav-bg: #111722;
-    --cf-subnav-bg: #131b27;
-    --cf-card-bg: #16202e;
-    --cf-card-elev: #1a2638;
-    --cf-inset: #090e15;
-    --cf-input-bg: #0d1420;
+  :root:not([data-theme="light"]):not([data-theme="dark"]):not([data-mode="light"]):not([data-mode="dark"]) {
+    --cf-bg: #080808;
+    --cf-nav-bg: #0e0e10;
+    --cf-subnav-bg: #0e0e10;
+    --cf-card-bg: #121214;
+    --cf-card-elev: #17171a;
+    --cf-inset: #1a1a1d;
+    --cf-input-bg: #141416;
 
-    --cf-border: #222f42;
-    --cf-border-strong: #2f4057;
-    --cf-border-subtle: #192433;
+    --cf-border: #262629;
+    --cf-border-strong: #36363a;
+    --cf-border-subtle: #1c1c1f;
 
-    --cf-text-strong: #f8fafc;
-    --cf-text: #e2e8f0;
-    --cf-text-muted: #8b9cb0;
-    --cf-text-faint: #5a6e85;
+    --cf-text-strong: #fafafa;
+    --cf-text: #e4e4e7;
+    --cf-text-muted: #8e8e93;
+    --cf-text-faint: #5a5a60;
 
     --cf-success: #10b981;
-    --cf-success-bg: rgba(16, 185, 129, 0.12);
+    --cf-success-bg: rgba(16, 185, 129, 0.14);
     --cf-warning: #f59e0b;
-    --cf-warning-bg: rgba(245, 158, 11, 0.12);
+    --cf-warning-bg: rgba(245, 158, 11, 0.14);
     --cf-danger: #ef4444;
-    --cf-danger-bg: rgba(239, 68, 68, 0.12);
+    --cf-danger-bg: rgba(239, 68, 68, 0.14);
     --cf-info: #3b82f6;
-    --cf-info-bg: rgba(59, 130, 246, 0.12);
+    --cf-info-bg: rgba(59, 130, 246, 0.14);
 
-    --cf-term-bg: #06090e;
-    --cf-term-header: #0a0f16;
-    --cf-term-border: #222f42;
+    --cf-term-bg: #040405;
+    --cf-term-header: #0a0a0c;
+    --cf-term-border: #222225;
   }
 }
 
@@ -136,11 +151,13 @@
   color-scheme: light dark;
 
   &:has(> head > meta[name="color-scheme"][content="dark"]),
-  &[data-theme="dark"] {
+  &[data-theme="dark"],
+  &[data-mode="dark"] {
     color-scheme: dark;
   }
   &:has(> head > meta[name="color-scheme"][content="light"]),
-  &[data-theme="light"] {
+  &[data-theme="light"],
+  &[data-mode="light"] {
     color-scheme: light;
   }
 }
@@ -388,15 +405,88 @@ progress.cf-progress.sky::-moz-progress-bar {
 }
 
 /* --------------------------------------------------------------------------
-   3. Cloudflare Navigation Tabs (Horizontal Strip)
+   3. Cloudflare Kumo Segmented Control Navigation & Tabs
    -------------------------------------------------------------------------- */
-.cf-tabs-container {
-  display: flex;
+.cf-segmented-nav {
+  display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--cf-inset);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--radius-cf);
   overflow-x: auto;
+  max-width: 100%;
   scrollbar-width: none;
-  margin-top: 0.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+.cf-segmented-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.cf-segmented-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.65rem;
+  font-size: 0.775rem;
+  font-weight: 500;
+  color: var(--cf-text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s ease;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.cf-segmented-btn:hover {
+  color: var(--cf-text-strong);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .cf-segmented-btn:hover,
+[data-mode="light"] .cf-segmented-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.cf-segmented-btn.active {
+  color: var(--cf-text-strong);
+  background: var(--cf-card-bg);
+  border-color: var(--cf-border);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+.cf-segmented-count {
+  font-size: 0.65rem;
+  font-family: var(--mono);
+  padding: 0.05rem 0.35rem;
+  border-radius: var(--radius-pill);
+  background: var(--cf-inset);
+  border: 1px solid var(--cf-border-subtle);
+  color: var(--cf-text-muted);
+}
+
+.cf-segmented-btn.active .cf-segmented-count {
+  background: var(--cf-orange-subtle);
+  border-color: var(--cf-orange-border);
+  color: var(--cf-orange);
+}
+
+.cf-tabs-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--cf-inset);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--radius-cf);
+  overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: none;
 }
 
 .cf-tabs-container::-webkit-scrollbar {
@@ -406,35 +496,45 @@ progress.cf-progress.sky::-moz-progress-bar {
 .cf-tab-button {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.65rem 0.95rem;
-  font-size: 0.85rem;
+  gap: 0.375rem;
+  padding: 0.375rem 0.65rem;
+  font-size: 0.775rem;
   font-weight: 500;
   color: var(--cf-text-muted);
   background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
+  flex-shrink: 0;
 }
 
 .cf-tab-button:hover {
   color: var(--cf-text-strong);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .cf-tab-button:hover,
+[data-mode="light"] .cf-tab-button:hover {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .cf-tab-button.active {
-  color: var(--cf-orange);
-  border-bottom-color: var(--cf-orange);
+  color: var(--cf-text-strong);
+  background: var(--cf-card-bg);
+  border-color: var(--cf-border);
   font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
 }
 
 .cf-tab-count {
-  font-size: 0.7rem;
-  padding: 0.1rem 0.4rem;
+  font-size: 0.65rem;
+  font-family: var(--mono);
+  padding: 0.05rem 0.35rem;
   border-radius: var(--radius-pill);
   background: var(--cf-inset);
-  border: 1px solid var(--cf-border);
+  border: 1px solid var(--cf-border-subtle);
   color: var(--cf-text-muted);
 }
 

@@ -5,9 +5,9 @@ import "../globals.css";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
-  CloudflareLogo,
   Badge,
   Button,
+  ButtonGroup,
   Banner,
 } from "@cloudflare/kumo";
 import {
@@ -145,8 +145,10 @@ export function Dashboard({
     } else {
       setTheme("system");
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setResolvedTheme(prefersDark ? "dark" : "light");
-      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
+      const res = prefersDark ? "dark" : "light";
+      setResolvedTheme(res);
+      document.documentElement.setAttribute("data-theme", res);
+      document.documentElement.setAttribute("data-mode", res);
     }
 
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
@@ -156,6 +158,7 @@ export function Dashboard({
         const next = e.matches ? "dark" : "light";
         setResolvedTheme(next);
         document.documentElement.setAttribute("data-theme", next);
+        document.documentElement.setAttribute("data-mode", next);
       }
     };
     mql.addEventListener("change", handleMqlChange);
@@ -167,12 +170,14 @@ export function Dashboard({
           setTheme(val);
           setResolvedTheme(val);
           document.documentElement.setAttribute("data-theme", val);
+          document.documentElement.setAttribute("data-mode", val);
         } else {
           setTheme("system");
           const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
           const next = prefersDark ? "dark" : "light";
           setResolvedTheme(next);
           document.documentElement.setAttribute("data-theme", next);
+          document.documentElement.setAttribute("data-mode", next);
         }
       }
     };
@@ -201,11 +206,13 @@ export function Dashboard({
       const res = prefersDark ? "dark" : "light";
       setResolvedTheme(res);
       document.documentElement.setAttribute("data-theme", res);
+      document.documentElement.setAttribute("data-mode", res);
       if (meta) meta.content = "light dark";
     } else {
       localStorage.setItem("color-scheme", next);
       setResolvedTheme(next);
       document.documentElement.setAttribute("data-theme", next);
+      document.documentElement.setAttribute("data-mode", next);
       if (meta) meta.content = next;
     }
   };
@@ -963,18 +970,24 @@ export function Dashboard({
         <div className="cf-logo-wrapper">
           <div
             onClick={() => navigateTab("overview")}
-            className="flex items-center gap-2 cursor-pointer select-none"
+            className="flex items-center gap-2.5 cursor-pointer select-none group"
+            title="ESP32 Remote · Direct Edge Web Bluetooth"
           >
-            <CloudflareLogo variant="full" className="h-5 text-[var(--cf-text-strong)]" />
-            <Badge variant="neutral" className="text-[10px] font-mono px-1.5 py-0.5">
-              ESP32-S3
-            </Badge>
+            <div className="w-7 h-7 rounded-md bg-[var(--cf-card-elev)] border border-[var(--cf-border-strong)] flex items-center justify-center text-[var(--cf-orange)] shadow-xs group-hover:border-[var(--cf-orange)] transition-colors">
+              <Cpu size={16} weight="bold" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-sm tracking-tight text-[var(--cf-text-strong)]">ESP32</span>
+              <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-[var(--cf-inset)] text-[var(--cf-text-muted)] border border-[var(--cf-border-subtle)] font-medium">
+                Remote
+              </span>
+            </div>
           </div>
 
           <span className="hidden sm:inline text-[var(--cf-border-strong)]">|</span>
 
           <div className="hidden sm:flex cf-account-pill">
-            <span>unesp32&#39;s Account</span>
+            <span>unesp32</span>
             <CaretDown size={12} className="text-[var(--cf-text-muted)]" />
           </div>
         </div>
@@ -1075,93 +1088,113 @@ export function Dashboard({
           </div>
         </div>
 
-        {/* Scrollable Horizontal Tabs Container (10 Integrated Tabs) */}
-        <nav className="cf-tabs-container overflow-x-auto scrollbar-none flex gap-1 -mx-4 px-4 sm:mx-0 sm:px-0">
-          <button
-            onClick={() => navigateTab("overview")}
-            className={`cf-tab-button shrink-0 ${activeTab === "overview" ? "active" : ""}`}
-          >
-            <Broadcast size={14} />
-            <span>Overview</span>
-          </button>
+        {/* Cloudflare Kumo Segmented Control Navigation (10 Compact Tabs) */}
+        <div className="pb-2.5 overflow-x-auto scrollbar-none -mx-2 px-2 sm:mx-0 sm:px-0">
+          <nav className="cf-segmented-nav flex" aria-label="Main Navigation">
+            <button
+              onClick={() => navigateTab("overview")}
+              className={`cf-segmented-btn ${activeTab === "overview" ? "active" : ""}`}
+              title="Overview · System health, BLE GATT status & quick actions"
+            >
+              <Broadcast size={13} />
+              <span>Overview</span>
+            </button>
 
-          <button
-            onClick={() => navigateTab("tools")}
-            className={`cf-tab-button shrink-0 ${activeTab === "tools" ? "active" : ""}`}
-          >
-            <Globe size={14} />
-            <span>Network Tools</span>
-          </button>
+            <button
+              onClick={() => navigateTab("tools")}
+              className={`cf-segmented-btn ${activeTab === "tools" ? "active" : ""}`}
+              title="Network Tools · 1.1.1.1 DNS, BGP ASN WHOIS, cURL & Ping"
+            >
+              <Globe size={13} />
+              <span>Tools</span>
+            </button>
 
-          <button
-            onClick={() => navigateTab("hardware")}
-            className={`cf-tab-button shrink-0 ${activeTab === "hardware" ? "active" : ""}`}
-          >
-            <Cpu size={14} />
-            <span>Hardware &amp; RAM</span>
-          </button>
+            <button
+              onClick={() => navigateTab("hardware")}
+              className={`cf-segmented-btn ${activeTab === "hardware" ? "active" : ""}`}
+              title="Hardware · ESP32-S3 SRAM, PSRAM, Flash & RTC Clock"
+            >
+              <Cpu size={13} />
+              <span>HW</span>
+            </button>
 
-          <button
-            onClick={() => navigateTab("console")}
-            className={`cf-tab-button shrink-0 ${activeTab === "console" ? "active" : ""}`}
-          >
-            <Terminal size={14} />
-            <span>Logs</span>
-            <span className="cf-tab-count">{logs.length}</span>
-          </button>
+            <button
+              onClick={() => navigateTab("console")}
+              className={`cf-segmented-btn ${activeTab === "console" ? "active" : ""}`}
+              title="Logs · Real-time Workers Tail GATT serial console"
+            >
+              <Terminal size={13} />
+              <span>Logs</span>
+              {logs.length > 0 && <span className="cf-segmented-count">{logs.length}</span>}
+            </button>
 
-          <button
-            onClick={() => navigateTab("gpio")}
-            className={`cf-tab-button shrink-0 ${activeTab === "gpio" ? "active" : ""}`}
-          >
-            <SlidersHorizontal size={14} />
-            <span>Control &amp; GPIO</span>
-          </button>
+            <button
+              onClick={() => navigateTab("gpio")}
+              className={`cf-segmented-btn ${activeTab === "gpio" ? "active" : ""}`}
+              title="GPIO · Output header pins & status LED 48"
+            >
+              <SlidersHorizontal size={13} />
+              <span>GPIO</span>
+            </button>
 
-          <button
-            onClick={() => navigateTab("wifi")}
-            className={`cf-tab-button shrink-0 ${activeTab === "wifi" ? "active" : ""}`}
-          >
-            <WifiHigh size={14} />
-            <span>Wi-Fi</span>
-            {scanResults.length > 0 && <span className="cf-tab-count">{scanResults.length}</span>}
-          </button>
+            <button
+              onClick={() => navigateTab("wifi")}
+              className={`cf-segmented-btn ${activeTab === "wifi" ? "active" : ""}`}
+              title="Wi-Fi · 2.4 GHz RF scanner & credential provisioning"
+            >
+              <WifiHigh size={13} />
+              <span>Wi-Fi</span>
+              {scanResults.length > 0 && (
+                <span className="cf-segmented-count">{scanResults.length}</span>
+              )}
+            </button>
 
-          <button
-            onClick={() => navigateTab("profiles")}
-            className={`cf-tab-button shrink-0 ${activeTab === "profiles" ? "active" : ""}`}
-          >
-            <HardDrives size={14} />
-            <span>Profiles</span>
-            <span className="cf-tab-count">{profiles.length}</span>
-          </button>
+            <button
+              onClick={() => navigateTab("profiles")}
+              className={`cf-segmented-btn ${activeTab === "profiles" ? "active" : ""}`}
+              title="Profiles · Stored Wi-Fi networks in Cloudflare D1"
+            >
+              <HardDrives size={13} />
+              <span>Profiles</span>
+              {profiles.length > 0 && (
+                <span className="cf-segmented-count">{profiles.length}</span>
+              )}
+            </button>
 
-          <button
-            onClick={() => navigateTab("devices")}
-            className={`cf-tab-button shrink-0 ${activeTab === "devices" ? "active" : ""}`}
-          >
-            <Database size={14} />
-            <span>Devices</span>
-            <span className="cf-tab-count">{devices.length}</span>
-          </button>
+            <button
+              onClick={() => navigateTab("devices")}
+              className={`cf-segmented-btn ${activeTab === "devices" ? "active" : ""}`}
+              title="Devices · Registered ESP32 inventory & MAC addresses"
+            >
+              <Database size={13} />
+              <span>Devices</span>
+              {devices.length > 0 && (
+                <span className="cf-segmented-count">{devices.length}</span>
+              )}
+            </button>
 
-          <button
-            onClick={() => navigateTab("history")}
-            className={`cf-tab-button shrink-0 ${activeTab === "history" ? "active" : ""}`}
-          >
-            <ClockCounterClockwise size={14} />
-            <span>Audit</span>
-            <span className="cf-tab-count">{history.length}</span>
-          </button>
+            <button
+              onClick={() => navigateTab("history")}
+              className={`cf-segmented-btn ${activeTab === "history" ? "active" : ""}`}
+              title="Audit · Cryptographic SQLite audit trail & event history"
+            >
+              <ClockCounterClockwise size={13} />
+              <span>Audit</span>
+              {history.length > 0 && (
+                <span className="cf-segmented-count">{history.length}</span>
+              )}
+            </button>
 
-          <button
-            onClick={() => navigateTab("settings")}
-            className={`cf-tab-button shrink-0 ${activeTab === "settings" ? "active" : ""}`}
-          >
-            <Gear size={14} />
-            <span>Settings</span>
-          </button>
-        </nav>
+            <button
+              onClick={() => navigateTab("settings")}
+              className={`cf-segmented-btn ${activeTab === "settings" ? "active" : ""}`}
+              title="Settings · Light/Dark theme, PWA installation & workspace config"
+            >
+              <Gear size={13} />
+              <span>Settings</span>
+            </button>
+          </nav>
+        </div>
       </section>
 
       {/* ====================================================================
@@ -1281,20 +1314,20 @@ export function Dashboard({
                   onClick={handlePing}
                   disabled={!connected}
                   className="cf-quick-action-pill disabled:opacity-40"
-                  title="Send PING probe"
+                  title="Send PING probe over BLE GATT"
                 >
                   <Lightning size={13} className="text-amber-400" />
-                  <span>PING</span>
+                  <span>Ping</span>
                 </button>
 
                 <button
                   onClick={handleStatus}
                   disabled={!connected}
                   className="cf-quick-action-pill disabled:opacity-40"
-                  title="Query Wi-Fi & RSSI status"
+                  title="Query Wi-Fi status & RSSI"
                 >
                   <Broadcast size={13} className="text-emerald-400" />
-                  <span>STATUS</span>
+                  <span>Status</span>
                 </button>
 
                 <button
@@ -1304,7 +1337,7 @@ export function Dashboard({
                   title="Toggle onboard GPIO 48 LED"
                 >
                   <Power size={13} className="text-purple-400" />
-                  <span>TOGGLE LED</span>
+                  <span>LED</span>
                 </button>
 
                 <button
@@ -1314,10 +1347,10 @@ export function Dashboard({
                   }}
                   disabled={!connected}
                   className="cf-quick-action-pill disabled:opacity-40"
-                  title="Scan 2.4GHz Wi-Fi channels"
+                  title="Scan 2.4 GHz Wi-Fi channels"
                 >
                   <WifiHigh size={13} className="text-cyan-400" />
-                  <span>SCAN WI-FI</span>
+                  <span>Scan</span>
                 </button>
 
                 <button
@@ -1326,7 +1359,7 @@ export function Dashboard({
                   title="Open Network Diagnostics"
                 >
                   <Globe size={13} className="text-sky-400" />
-                  <span>NETWORK TOOLS</span>
+                  <span>Tools</span>
                 </button>
               </div>
             </div>
@@ -1480,69 +1513,59 @@ export function Dashboard({
             TAB 2: Network Diagnostic Tools (Hurricane Electric he.net Suite)
             ================================================================== */}
         {activeTab === "tools" && (
-          <div className="space-y-4">
-            {/* Tool Category Selector Bar */}
-            <div className="p-2 rounded-lg bg-[var(--cf-card-bg)] border border-[var(--cf-border)] flex items-center gap-2 overflow-x-auto scrollbar-none">
-              <button
-                onClick={() => setToolSubTab("dns")}
-                className={`px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                  toolSubTab === "dns"
-                    ? "bg-[var(--cf-orange)] text-white shadow-xs"
-                    : "text-[var(--cf-text-muted)] hover:text-white"
-                }`}
-              >
-                <Globe size={14} />
-                <span>DNS Checker (1.1.1.1)</span>
-              </button>
+          <div className="space-y-3">
+            {/* Tool Category Selector Segmented Bar */}
+            <div className="overflow-x-auto scrollbar-none">
+              <nav className="cf-segmented-nav flex" aria-label="Network Tools Navigation">
+                <button
+                  onClick={() => setToolSubTab("dns")}
+                  className={`cf-segmented-btn ${toolSubTab === "dns" ? "active" : ""}`}
+                  title="1.1.1.1 DNS over HTTPS lookup & record inspection"
+                >
+                  <Globe size={13} />
+                  <span>DNS</span>
+                </button>
 
-              <button
-                onClick={() => setToolSubTab("ip")}
-                className={`px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                  toolSubTab === "ip"
-                    ? "bg-[var(--cf-orange)] text-white shadow-xs"
-                    : "text-[var(--cf-text-muted)] hover:text-white"
-                }`}
-              >
-                <ShieldCheck size={14} />
-                <span>BGP / ASN / IP WHOIS</span>
-              </button>
+                <button
+                  onClick={() => setToolSubTab("ip")}
+                  className={`cf-segmented-btn ${toolSubTab === "ip" ? "active" : ""}`}
+                  title="Hurricane Electric (he.net) BGP ASN & GeoIP WHOIS"
+                >
+                  <ShieldCheck size={13} />
+                  <span>BGP ASN</span>
+                </button>
 
-              <button
-                onClick={() => setToolSubTab("http")}
-                className={`px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                  toolSubTab === "http"
-                    ? "bg-[var(--cf-orange)] text-white shadow-xs"
-                    : "text-[var(--cf-text-muted)] hover:text-white"
-                }`}
-              >
-                <FileText size={14} />
-                <span>HTTP &amp; cURL Prober</span>
-              </button>
+                <button
+                  onClick={() => setToolSubTab("http")}
+                  className={`cf-segmented-btn ${toolSubTab === "http" ? "active" : ""}`}
+                  title="HTTP & cURL Edge Prober"
+                >
+                  <FileText size={13} />
+                  <span>cURL</span>
+                </button>
 
-              <button
-                onClick={() => setToolSubTab("ping")}
-                className={`px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                  toolSubTab === "ping"
-                    ? "bg-[var(--cf-orange)] text-white shadow-xs"
-                    : "text-[var(--cf-text-muted)] hover:text-white"
-                }`}
-              >
-                <Pulse size={14} />
-                <span>Ping &amp; Latency Graph</span>
-              </button>
+                <button
+                  onClick={() => setToolSubTab("ping")}
+                  className={`cf-segmented-btn ${toolSubTab === "ping" ? "active" : ""}`}
+                  title="Round-Trip Ping & RTT Latency"
+                >
+                  <Pulse size={13} />
+                  <span>Ping</span>
+                </button>
+              </nav>
             </div>
 
             {/* 1. DNS Checker */}
             {toolSubTab === "dns" && (
-              <div className="cf-card space-y-4 !p-4">
-                <div>
-                  <div className="text-sm font-bold text-[var(--cf-text-strong)] flex items-center gap-2">
-                    <Globe size={16} className="text-[var(--cf-orange)]" />
-                    <span>DNS Record Lookup over 1.1.1.1 DoH</span>
+              <div className="cf-card space-y-3 !p-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-bold text-[var(--cf-text-strong)] flex items-center gap-1.5">
+                    <Globe size={14} className="text-[var(--cf-orange)]" />
+                    <span>DNS Record Lookup (1.1.1.1 DoH)</span>
                   </div>
-                  <div className="text-xs text-[var(--cf-text-muted)] mt-0.5">
-                    Query authoritative Cloudflare DNS resolver for global record propagation.
-                  </div>
+                  <span className="text-[10px] font-mono text-[var(--cf-text-muted)]">
+                    Cloudflare Resolver
+                  </span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -1550,16 +1573,16 @@ export function Dashboard({
                     type="text"
                     value={dnsDomain}
                     onChange={(e) => setDnsDomain(e.target.value)}
-                    placeholder="Enter domain (e.g. virt.cc.cd)..."
-                    className="flex-1 min-w-[200px] bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-3 py-1.5 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
+                    placeholder="Domain (e.g. virt.cc.cd)..."
+                    className="flex-1 min-w-[180px] bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2.5 py-1 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
                   />
                   <select
                     value={dnsType}
                     onChange={(e) => setDnsType(e.target.value)}
-                    className="bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-3 py-1.5 text-xs text-[var(--cf-text-strong)] font-mono"
+                    className="bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2 py-1 text-xs text-[var(--cf-text-strong)] font-mono"
                   >
-                    <option value="A">A (IPv4)</option>
-                    <option value="AAAA">AAAA (IPv6)</option>
+                    <option value="A">A</option>
+                    <option value="AAAA">AAAA</option>
                     <option value="CNAME">CNAME</option>
                     <option value="TXT">TXT</option>
                     <option value="MX">MX</option>
@@ -1569,25 +1592,25 @@ export function Dashboard({
                   <Button
                     onClick={handleExecuteDns}
                     disabled={dnsLoading || !dnsDomain.trim()}
-                    className="cf-btn-orange text-xs !py-1.5"
+                    className="cf-btn-orange text-xs !py-1"
                   >
                     {dnsLoading ? "Querying..." : "Query DNS"}
                   </Button>
                 </div>
 
                 {dnsResult && (
-                  <div className="p-3 rounded bg-[var(--cf-inset)] border border-[var(--cf-border)] space-y-3">
+                  <div className="p-2.5 rounded bg-[var(--cf-inset)] border border-[var(--cf-border)] space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={dnsResult.status === 0 ? "success" : "red"}>
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant={dnsResult.status === 0 ? "success" : "red"} className="text-[10px]">
                           {dnsResult.statusName}
                         </Badge>
                         <span className="font-mono font-bold text-sky-400">
                           {dnsResult.domain} ({dnsResult.type})
                         </span>
                       </div>
-                      <div className="font-mono text-[var(--cf-text-faint)] text-[11px]">
-                        Latency: {dnsResult.elapsedMs}ms · {dnsResult.resolver}
+                      <div className="font-mono text-[var(--cf-text-faint)] text-[10px]">
+                        {dnsResult.elapsedMs}ms · {dnsResult.resolver}
                       </div>
                     </div>
 
@@ -1596,10 +1619,10 @@ export function Dashboard({
                         <table className="cf-table text-xs">
                           <thead>
                             <tr>
-                              <th>Record Name</th>
+                              <th>Record</th>
                               <th>Type</th>
                               <th>TTL</th>
-                              <th>Target / IP Address</th>
+                              <th>Target / IP</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1617,8 +1640,8 @@ export function Dashboard({
                         </table>
                       </div>
                     ) : (
-                      <div className="text-xs text-[var(--cf-text-faint)] py-2">
-                        No answer records returned for this query type.
+                      <div className="text-xs text-[var(--cf-text-faint)] py-1">
+                        No answer records returned.
                       </div>
                     )}
                   </div>
@@ -1628,15 +1651,15 @@ export function Dashboard({
 
             {/* 2. BGP / ASN / IP WHOIS (he.net BGP Toolkit style) */}
             {toolSubTab === "ip" && (
-              <div className="cf-card space-y-4 !p-4">
-                <div>
-                  <div className="text-sm font-bold text-[var(--cf-text-strong)] flex items-center gap-2">
-                    <ShieldCheck size={16} className="text-emerald-400" />
-                    <span>Hurricane Electric (he.net) Style BGP ASN &amp; IP WHOIS</span>
+              <div className="cf-card space-y-3 !p-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-bold text-[var(--cf-text-strong)] flex items-center gap-1.5">
+                    <ShieldCheck size={14} className="text-emerald-400" />
+                    <span>BGP ASN &amp; IP WHOIS (he.net style)</span>
                   </div>
-                  <div className="text-xs text-[var(--cf-text-muted)] mt-0.5">
-                    Query Autonomous System Numbers, Peering details, GeoIP, and ISP organizations.
-                  </div>
+                  <span className="text-[10px] font-mono text-[var(--cf-text-muted)]">
+                    BGP Toolkit
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
@@ -1644,56 +1667,51 @@ export function Dashboard({
                     type="text"
                     value={ipQuery}
                     onChange={(e) => setIpQuery(e.target.value)}
-                    placeholder="Enter IP or Hostname (e.g. 1.1.1.1)..."
-                    className="flex-1 min-w-[220px] bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-3 py-1.5 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
+                    placeholder="IP or Hostname (e.g. 1.1.1.1)..."
+                    className="flex-1 min-w-[200px] bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2.5 py-1 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
                   />
                   <Button
                     onClick={handleExecuteIpLookup}
                     disabled={ipLoading || !ipQuery.trim()}
-                    className="cf-btn-orange text-xs !py-1.5"
+                    className="cf-btn-orange text-xs !py-1"
                   >
-                    {ipLoading ? "Looking up..." : "Lookup BGP & WHOIS"}
+                    {ipLoading ? "Looking up..." : "Lookup BGP"}
                   </Button>
                 </div>
 
                 {ipResult && (
-                  <div className="p-3.5 rounded bg-[var(--cf-inset)] border border-[var(--cf-border)]">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  <div className="p-3 rounded bg-[var(--cf-inset)] border border-[var(--cf-border)]">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                       <div>
-                        <div className="font-semibold text-[var(--cf-text-muted)] mb-1">
+                        <div className="font-semibold text-[var(--cf-text-muted)] mb-1 text-[11px]">
                           Routing &amp; BGP ASN:
                         </div>
-                        <div className="p-2.5 rounded bg-[var(--cf-card-bg)] border border-[var(--cf-border-subtle)] space-y-1 font-mono">
-                          <div>
-                            ASN: <span className="text-[var(--cf-orange)] font-bold">{ipResult.asn}</span>
-                          </div>
+                        <div className="p-2 rounded bg-[var(--cf-card-bg)] border border-[var(--cf-border-subtle)] space-y-1 font-mono text-xs">
+                          <div>ASN: <span className="text-[var(--cf-orange)] font-bold">{ipResult.asn}</span></div>
                           <div>ISP: <span className="text-sky-400">{ipResult.isp}</span></div>
-                          <div>Organization: <span>{ipResult.org}</span></div>
-                          <div>IP Version: <span>{ipResult.type}</span></div>
+                          <div>Org: <span>{ipResult.org}</span></div>
+                          <div>IP: <span>{ipResult.type}</span></div>
                         </div>
                       </div>
 
                       <div>
-                        <div className="font-semibold text-[var(--cf-text-muted)] mb-1">
+                        <div className="font-semibold text-[var(--cf-text-muted)] mb-1 text-[11px]">
                           Geolocation &amp; Timezone:
                         </div>
-                        <div className="p-2.5 rounded bg-[var(--cf-card-bg)] border border-[var(--cf-border-subtle)] space-y-1 font-mono">
+                        <div className="p-2 rounded bg-[var(--cf-card-bg)] border border-[var(--cf-border-subtle)] space-y-1 font-mono text-xs">
                           <div>
-                            Location:{" "}
-                            <span className="text-emerald-400 font-bold">
-                              {ipResult.city}, {ipResult.region}, {ipResult.country}
-                            </span>
+                            Loc: <span className="text-emerald-400 font-bold">{ipResult.city}, {ipResult.country}</span>
                           </div>
-                          <div>Coordinates: <span>{ipResult.latitude}, {ipResult.longitude}</span></div>
+                          <div>Coords: <span>{ipResult.latitude}, {ipResult.longitude}</span></div>
                           <div>Timezone: <span>{ipResult.timezone}</span></div>
                           <div className="text-[var(--cf-text-faint)]">
-                            Lookup Time: {ipResult.elapsedMs}ms
+                            RTT: {ipResult.elapsedMs}ms
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="mt-3 pt-2 border-t border-[var(--cf-border)] text-[11px] text-[var(--cf-text-faint)] flex items-center justify-between">
+                    <div className="mt-2.5 pt-2 border-t border-[var(--cf-border)] text-[10px] text-[var(--cf-text-faint)] flex items-center justify-between">
                       <span>BGP Toolkit Integration</span>
                       <a
                         href={`https://bgp.he.net/${ipResult.asn}`}
@@ -1702,7 +1720,7 @@ export function Dashboard({
                         className="text-sky-400 hover:underline flex items-center gap-1"
                       >
                         <span>View on bgp.he.net</span>
-                        <ArrowSquareOut size={11} />
+                        <ArrowSquareOut size={10} />
                       </a>
                     </div>
                   </div>
@@ -1712,22 +1730,22 @@ export function Dashboard({
 
             {/* 3. HTTP Prober & cURL Prober */}
             {toolSubTab === "http" && (
-              <div className="cf-card space-y-4 !p-4">
-                <div>
-                  <div className="text-sm font-bold text-[var(--cf-text-strong)] flex items-center gap-2">
-                    <FileText size={16} className="text-cyan-400" />
-                    <span>HTTP &amp; cURL Prober (ESP32 &amp; Cloudflare Edge)</span>
+              <div className="cf-card space-y-3 !p-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-bold text-[var(--cf-text-strong)] flex items-center gap-1.5">
+                    <FileText size={14} className="text-cyan-400" />
+                    <span>HTTP &amp; cURL Edge Prober</span>
                   </div>
-                  <div className="text-xs text-[var(--cf-text-muted)] mt-0.5">
-                    Execute an HTTP fetch, inspect response headers, TLS handshake, and body payload.
-                  </div>
+                  <span className="text-[10px] font-mono text-[var(--cf-text-muted)]">
+                    Edge Fetch
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
                   <select
                     value={httpMethod}
                     onChange={(e) => setHttpMethod(e.target.value)}
-                    className="bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2.5 py-1.5 text-xs text-[var(--cf-text-strong)] font-mono font-bold"
+                    className="bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2 py-1 text-xs text-[var(--cf-text-strong)] font-mono font-bold"
                   >
                     <option value="GET">GET</option>
                     <option value="POST">POST</option>
@@ -1737,38 +1755,38 @@ export function Dashboard({
                     type="text"
                     value={httpTargetUrl}
                     onChange={(e) => setHttpTargetUrl(e.target.value)}
-                    placeholder="Enter target URL..."
-                    className="flex-1 min-w-[240px] bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-3 py-1.5 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
+                    placeholder="Target URL..."
+                    className="flex-1 min-w-[200px] bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2.5 py-1 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
                   />
                   <Button
                     onClick={handleExecuteHttp}
                     disabled={httpLoading || !httpTargetUrl.trim()}
-                    className="cf-btn-orange text-xs !py-1.5"
+                    className="cf-btn-orange text-xs !py-1"
                   >
                     {httpLoading ? "Fetching..." : "Run cURL"}
                   </Button>
                 </div>
 
                 {httpResult && (
-                  <div className="p-3.5 rounded bg-[var(--cf-inset)] border border-[var(--cf-border)] space-y-3">
+                  <div className="p-3 rounded bg-[var(--cf-inset)] border border-[var(--cf-border)] space-y-2.5">
                     <div className="flex items-center justify-between text-xs flex-wrap gap-2">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={httpResult.status < 400 ? "success" : "red"}>
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant={httpResult.status < 400 ? "success" : "red"} className="text-[10px]">
                           {httpResult.status} {httpResult.statusText}
                         </Badge>
-                        <span className="font-mono text-sky-400 font-semibold">{httpResult.url}</span>
+                        <span className="font-mono text-sky-400 font-semibold truncate max-w-xs">{httpResult.url}</span>
                       </div>
-                      <div className="font-mono text-[var(--cf-text-faint)] text-[11px]">
-                        TTFB: {httpResult.elapsedMs}ms · {httpResult.protocol} · {httpResult.contentLength} bytes
+                      <div className="font-mono text-[var(--cf-text-faint)] text-[10px]">
+                        TTFB: {httpResult.elapsedMs}ms · {httpResult.protocol} · {httpResult.contentLength}B
                       </div>
                     </div>
 
                     {/* Response Headers Table */}
                     <div>
-                      <div className="text-[11px] font-semibold text-[var(--cf-text-muted)] mb-1">
-                        Response Headers:
+                      <div className="text-[10px] font-semibold text-[var(--cf-text-muted)] mb-1">
+                        Headers:
                       </div>
-                      <div className="max-h-36 overflow-y-auto border border-[var(--cf-border-subtle)] rounded">
+                      <div className="max-h-32 overflow-y-auto border border-[var(--cf-border-subtle)] rounded">
                         <table className="cf-table text-[11px]">
                           <tbody>
                             {Object.entries(httpResult.headers).map(([k, v]) => (
@@ -1788,10 +1806,10 @@ export function Dashboard({
 
                     {/* Body Snippet */}
                     <div>
-                      <div className="text-[11px] font-semibold text-[var(--cf-text-muted)] mb-1">
-                        Response Body Snippet:
+                      <div className="text-[10px] font-semibold text-[var(--cf-text-muted)] mb-1">
+                        Body Preview:
                       </div>
-                      <pre className="p-2.5 rounded bg-[var(--cf-term-bg)] border border-[var(--cf-term-border)] font-mono text-[11px] text-white max-h-40 overflow-y-auto whitespace-pre-wrap">
+                      <pre className="p-2 rounded bg-[var(--cf-term-bg)] border border-[var(--cf-term-border)] font-mono text-[11px] text-white max-h-32 overflow-y-auto whitespace-pre-wrap">
                         {httpResult.bodyPreview || "<Empty Response Body>"}
                       </pre>
                     </div>
@@ -1802,15 +1820,15 @@ export function Dashboard({
 
             {/* 4. Ping & Latency Tester */}
             {toolSubTab === "ping" && (
-              <div className="cf-card space-y-4 !p-4">
-                <div>
-                  <div className="text-sm font-bold text-[var(--cf-text-strong)] flex items-center gap-2">
-                    <Pulse size={16} className="text-amber-400" />
+              <div className="cf-card space-y-3 !p-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-bold text-[var(--cf-text-strong)] flex items-center gap-1.5">
+                    <Pulse size={14} className="text-amber-400" />
                     <span>Ping &amp; Round-Trip Latency Monitor</span>
                   </div>
-                  <div className="text-xs text-[var(--cf-text-muted)] mt-0.5">
-                    Measure round-trip time, jitter, and reachability.
-                  </div>
+                  <span className="text-[10px] font-mono text-[var(--cf-text-muted)]">
+                    RTT &amp; Jitter
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
@@ -1818,13 +1836,13 @@ export function Dashboard({
                     type="text"
                     value={pingTarget}
                     onChange={(e) => setPingTarget(e.target.value)}
-                    placeholder="Enter host to ping (e.g. 1.1.1.1)..."
-                    className="flex-1 min-w-[200px] bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-3 py-1.5 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
+                    placeholder="Host to ping (e.g. 1.1.1.1)..."
+                    className="flex-1 min-w-[180px] bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2.5 py-1 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
                   />
                   <Button
                     onClick={handleExecutePingTest}
                     disabled={pingRunning}
-                    className="cf-btn-orange text-xs !py-1.5"
+                    className="cf-btn-orange text-xs !py-1"
                   >
                     {pingRunning ? "Pinging..." : "Send Ping"}
                   </Button>
@@ -1928,9 +1946,9 @@ export function Dashboard({
                   <progress className="cf-progress sky" value={10} max={100} />
                 </div>
 
-                <div className="p-2.5 rounded bg-[var(--cf-inset)] text-[11px] text-[var(--cf-text-muted)]">
-                  Coexistence allocation active: Trouble BLE host stack and Embassy Wi-Fi controller
-                  co-scheduled over 64KB reclaimed heap memory segments.
+                <div className="flex items-center gap-2 text-[11px] text-[var(--cf-text-muted)] pt-1">
+                  <Pulse size={13} className="text-emerald-400 shrink-0" />
+                  <span>Radio Coexistence: Trouble BLE + Embassy Wi-Fi co-scheduled (64KB heap)</span>
                 </div>
               </div>
             </div>
@@ -2681,39 +2699,27 @@ export function Dashboard({
                   <label className="block text-xs font-bold text-[var(--cf-text-strong)] mb-2">
                     Color Theme Mode
                   </label>
-                  <div className="flex items-center gap-2 p-1 rounded-lg bg-[var(--cf-inset)] border border-[var(--cf-border)] w-fit flex-wrap">
+                  <div className="cf-segmented-nav flex">
                     <button
                       type="button"
                       onClick={() => toggleTheme("light")}
-                      className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold ${
-                        theme === "light"
-                          ? "bg-[var(--cf-card-bg)] text-[var(--cf-text-strong)] shadow-xs"
-                          : "text-[var(--cf-text-muted)]"
-                      }`}
+                      className={`cf-segmented-btn ${theme === "light" ? "active" : ""}`}
                     >
-                      <Sun size={14} className="text-amber-500" /> Light
+                      <Sun size={13} className="text-amber-500" /> <span>Light</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => toggleTheme("dark")}
-                      className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold ${
-                        theme === "dark"
-                          ? "bg-[var(--cf-card-bg)] text-[var(--cf-text-strong)] shadow-xs"
-                          : "text-[var(--cf-text-muted)]"
-                      }`}
+                      className={`cf-segmented-btn ${theme === "dark" ? "active" : ""}`}
                     >
-                      <Moon size={14} className="text-sky-400" /> Dark
+                      <Moon size={13} className="text-sky-400" /> <span>Dark</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => toggleTheme("system")}
-                      className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold ${
-                        theme === "system"
-                          ? "bg-[var(--cf-card-bg)] text-[var(--cf-text-strong)] shadow-xs"
-                          : "text-[var(--cf-text-muted)]"
-                      }`}
+                      className={`cf-segmented-btn ${theme === "system" ? "active" : ""}`}
                     >
-                      <Desktop size={14} /> System ({resolvedTheme})
+                      <Desktop size={13} /> <span>System ({resolvedTheme})</span>
                     </button>
                   </div>
                 </div>
@@ -2835,8 +2841,8 @@ export function Dashboard({
       <footer className="hidden md:block mt-auto border-t border-[var(--cf-border)] bg-[var(--cf-nav-bg)] py-3 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-[var(--cf-text-faint)]">
           <div className="flex items-center gap-2">
-            <CloudflareLogo variant="glyph" className="h-3.5 text-[var(--cf-orange)]" />
-            <span>Cloudflare Workers · Vinext RSC · Cloudflare D1 · Web Bluetooth · Hurricane Electric Tools</span>
+            <Cpu size={14} className="text-[var(--cf-orange)]" />
+            <span>ESP32-S3 Remote Console · Vinext RSC · Cloudflare Workers Edge</span>
           </div>
           <div className="flex items-center gap-4">
             <a
