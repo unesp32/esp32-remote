@@ -1,40 +1,94 @@
 @import "tailwindcss";
-@import "./sds/theme.css";
-@import "./sds/sds.css";
 @import "@cloudflare/kumo/styles/standalone";
 
 /* ==========================================================================
-   Cloudflare Dashboard Native Design System with Figma SDS Integration
+   Cloudflare Dashboard Native Design System
+   Dual-Theme (Light & Dark) with Native Cloudflare Blue Theme
    ========================================================================== */
 
-:root {
-  /* Cloudflare Brand Colors */
-  --cf-orange: var(--sds-color-background-brand-default, #f6821f);
-  --cf-orange-hover: var(--sds-color-background-brand-hover, #ea7314);
-  --cf-orange-active: #d9650b;
-  --cf-orange-glow: rgba(246, 130, 31, 0.25);
-  --cf-orange-subtle: var(--sds-color-background-brand-tertiary, rgba(246, 130, 31, 0.12));
-  --cf-orange-border: rgba(246, 130, 31, 0.38);
+:root,
+[data-theme="light"],
+[data-mode="light"] {
+  /* Cloudflare Brand Blue */
+  --cf-blue: #0051c3;
+  --cf-blue-hover: #003f9e;
+  --cf-blue-active: #002e75;
+  --cf-blue-glow: rgba(0, 81, 195, 0.16);
+  --cf-blue-subtle: rgba(0, 81, 195, 0.08);
+  --cf-blue-border: rgba(0, 81, 195, 0.28);
 
-  /* Surfaces mapped to SDS */
-  --cf-bg: var(--sds-color-background-default-secondary, #080808);
-  --cf-nav-bg: var(--sds-color-background-default-default, #121214);
-  --cf-subnav-bg: var(--sds-color-background-default-default, #121214);
-  --cf-card-bg: var(--sds-color-background-default-default, #121214);
-  --cf-card-elev: var(--sds-color-background-default-default-hover, #17171a);
-  --cf-inset: var(--sds-color-background-default-tertiary, #1a1a1d);
-  --cf-input-bg: var(--sds-color-background-default-default, #121214);
+  /* Kumo Surfaces (Light) */
+  --cf-bg: #fafafa;
+  --cf-nav-bg: #ffffff;
+  --cf-subnav-bg: #ffffff;
+  --cf-card-bg: #ffffff;
+  --cf-card-elev: #f4f4f6;
+  --cf-inset: #f0f0f3;
+  --cf-input-bg: #ffffff;
 
-  /* Borders mapped to SDS */
-  --cf-border: var(--sds-color-border-default-default, #262629);
-  --cf-border-strong: var(--sds-color-border-default-secondary, #36363a);
-  --cf-border-subtle: var(--sds-color-border-default-tertiary, #1c1c1f);
+  /* Kumo Borders (Light) */
+  --cf-border: #e4e4e7;
+  --cf-border-strong: #d4d4d8;
+  --cf-border-subtle: #f0f0f3;
 
-  /* Typography mapped to SDS */
-  --cf-text-strong: var(--sds-color-text-default-default, #fafafa);
-  --cf-text: var(--sds-color-text-default-default, #e4e4e7);
-  --cf-text-muted: var(--sds-color-text-default-secondary, #8e8e93);
-  --cf-text-faint: var(--sds-color-text-default-tertiary, #5a5a60);
+  /* Kumo Typography (Light) */
+  --cf-text-strong: #09090b;
+  --cf-text: #18181b;
+  --cf-text-muted: #71717a;
+  --cf-text-faint: #a1a1aa;
+
+  /* Status Colors */
+  --cf-success: #10b981;
+  --cf-success-bg: rgba(16, 185, 129, 0.1);
+  --cf-warning: #f59e0b;
+  --cf-warning-bg: rgba(245, 158, 11, 0.1);
+  --cf-danger: #ef4444;
+  --cf-danger-bg: rgba(239, 68, 68, 0.1);
+  --cf-info: #0051c3;
+  --cf-info-bg: rgba(0, 81, 195, 0.1);
+
+  /* Terminal Surface */
+  --cf-term-bg: #09090b;
+  --cf-term-header: #121215;
+  --cf-term-border: #27272a;
+
+  /* Standard Geometry */
+  --radius-cf: 8px;
+  --radius-sm: 6px;
+  --radius-pill: 9999px;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+[data-theme="dark"],
+[data-mode="dark"] {
+  /* Cloudflare Brand Blue (Dark Mode) */
+  --cf-blue: #2f80ed;
+  --cf-blue-hover: #1a6cd4;
+  --cf-blue-active: #1355a8;
+  --cf-blue-glow: rgba(47, 128, 237, 0.25);
+  --cf-blue-subtle: rgba(47, 128, 237, 0.12);
+  --cf-blue-border: rgba(47, 128, 237, 0.38);
+
+  /* Kumo Surfaces (Dark - deep jet black, strictly neutral) */
+  --cf-bg: #080808;
+  --cf-nav-bg: #0e0e10;
+  --cf-subnav-bg: #0e0e10;
+  --cf-card-bg: #121214;
+  --cf-card-elev: #17171a;
+  --cf-inset: #1a1a1d;
+  --cf-input-bg: #141416;
+
+  /* Kumo Borders (Dark - pure neutral greys) */
+  --cf-border: #262629;
+  --cf-border-strong: #36363a;
+  --cf-border-subtle: #1c1c1f;
+
+  /* Kumo Typography (Dark - pure high contrast) */
+  --cf-text-strong: #fafafa;
+  --cf-text: #e4e4e7;
+  --cf-text-muted: #8e8e93;
+  --cf-text-faint: #5a5a60;
 
   /* Status Colors */
   --cf-success: #10b981;
@@ -43,20 +97,50 @@
   --cf-warning-bg: rgba(245, 158, 11, 0.14);
   --cf-danger: #ef4444;
   --cf-danger-bg: rgba(239, 68, 68, 0.14);
-  --cf-info: #3b82f6;
-  --cf-info-bg: rgba(59, 130, 246, 0.14);
+  --cf-info: #2f80ed;
+  --cf-info-bg: rgba(47, 128, 237, 0.14);
 
   /* Terminal Surface */
   --cf-term-bg: #040405;
   --cf-term-header: #0a0a0c;
   --cf-term-border: #222225;
+}
 
-  /* Standard Geometry */
-  --radius-cf: var(--sds-size-radius-200, 8px);
-  --radius-sm: var(--sds-size-radius-100, 4px);
-  --radius-pill: var(--sds-size-radius-full, 9999px);
-  --mono: var(--sds-typography-family-mono, ui-monospace, "SF Mono", monospace);
-  --sans: var(--sds-typography-family-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-mode="light"]) {
+    --cf-blue: #2f80ed;
+    --cf-blue-hover: #1a6cd4;
+    --cf-blue-active: #1355a8;
+    --cf-blue-glow: rgba(47, 128, 237, 0.25);
+    --cf-blue-subtle: rgba(47, 128, 237, 0.12);
+    --cf-blue-border: rgba(47, 128, 237, 0.38);
+
+    --cf-bg: #080808;
+    --cf-nav-bg: #0e0e10;
+    --cf-subnav-bg: #0e0e10;
+    --cf-card-bg: #121214;
+    --cf-card-elev: #17171a;
+    --cf-inset: #1a1a1d;
+    --cf-input-bg: #141416;
+
+    --cf-border: #262629;
+    --cf-border-strong: #36363a;
+    --cf-border-subtle: #1c1c1f;
+
+    --cf-text-strong: #fafafa;
+    --cf-text: #e4e4e7;
+    --cf-text-muted: #8e8e93;
+    --cf-text-faint: #5a5a60;
+
+    --cf-success: #10b981;
+    --cf-warning: #f59e0b;
+    --cf-danger: #ef4444;
+    --cf-info: #2f80ed;
+
+    --cf-term-bg: #040405;
+    --cf-term-header: #0a0a0c;
+    --cf-term-border: #222225;
+  }
 }
 
 :root {
@@ -99,12 +183,12 @@ progress.cf-progress {
 }
 progress.cf-progress::-webkit-progress-bar { background: transparent; }
 progress.cf-progress::-webkit-progress-value {
-  background: var(--cf-orange);
+  background: var(--cf-blue);
   border-radius: var(--radius-pill);
   transition: inline-size 0.3s ease;
 }
 progress.cf-progress::-moz-progress-bar {
-  background: var(--cf-orange);
+  background: var(--cf-blue);
   border-radius: var(--radius-pill);
   transition: inline-size 0.3s ease;
 }
@@ -126,7 +210,7 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
 }
 .cf-chart-line {
   fill: none;
-  stroke: var(--cf-orange);
+  stroke: var(--cf-blue);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -167,12 +251,16 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
   font-weight: 500;
   color: var(--cf-text-strong);
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+.cf-account-pill:hover {
+  background: var(--cf-border);
 }
 
 .cf-sub-nav {
   background: var(--cf-subnav-bg);
   border-bottom: 1px solid var(--cf-border);
-  padding: 1.25rem 1.25rem 0 1.25rem;
+  padding: 1.25rem 1.25rem 0.75rem 1.25rem;
 }
 
 .cf-breadcrumbs {
@@ -190,7 +278,7 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
-  padding-bottom: 1.25rem;
+  padding-bottom: 1rem;
 }
 @media (min-width: 640px) {
   .cf-project-header {
@@ -208,7 +296,7 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--cf-orange);
+  color: var(--cf-blue);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -221,67 +309,6 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
   display: flex;
   align-items: center;
   gap: 0.65rem;
-}
-
-/* --------------------------------------------------------------------------
-   SDS Segmented Control Navigation & Tabs
-   -------------------------------------------------------------------------- */
-.cf-segmented-nav {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sds-size-space-100, 0.25rem);
-  padding: var(--sds-size-space-100, 0.25rem);
-  background: var(--cf-inset);
-  border: 1px solid var(--cf-border);
-  border-radius: var(--radius-cf);
-  overflow-x: auto;
-  max-width: 100%;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-.cf-segmented-nav::-webkit-scrollbar { display: none; }
-
-.cf-segmented-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.65rem;
-  font-size: 0.775rem;
-  font-weight: 500;
-  color: var(--cf-text-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.12s ease;
-  user-select: none;
-  flex-shrink: 0;
-}
-.cf-segmented-btn:hover {
-  color: var(--cf-text-strong);
-  background: var(--cf-card-elev);
-}
-.cf-segmented-btn.active {
-  color: var(--cf-text-strong);
-  background: var(--cf-card-bg);
-  border-color: var(--cf-border);
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
-}
-.cf-segmented-count {
-  font-size: 0.65rem;
-  font-family: var(--mono);
-  padding: 0.05rem 0.35rem;
-  border-radius: var(--radius-pill);
-  background: var(--cf-inset);
-  border: 1px solid var(--cf-border-subtle);
-  color: var(--cf-text-muted);
-}
-.cf-segmented-btn.active .cf-segmented-count {
-  background: var(--cf-orange-subtle);
-  border-color: var(--cf-orange-border);
-  color: var(--cf-orange);
 }
 
 /* --------------------------------------------------------------------------
@@ -322,7 +349,7 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
   height: 2px;
   background: transparent;
 }
-.cf-metric-card.highlight::before { background: var(--cf-orange); }
+.cf-metric-card.highlight::before { background: var(--cf-blue); }
 
 .cf-metric-label {
   font-size: 0.75rem;
@@ -389,47 +416,6 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
   justify-content: space-between;
   font-size: 0.775rem;
   color: var(--cf-text-muted);
-}
-
-/* --------------------------------------------------------------------------
-   SDS Button Adapters
-   -------------------------------------------------------------------------- */
-.cf-btn-orange {
-  background: var(--sds-color-background-brand-default, #f6821f) !important;
-  color: var(--sds-color-text-brand-on-brand, #ffffff) !important;
-  font-weight: 600 !important;
-  border: 1px solid var(--sds-color-border-brand-default, #f6821f) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
-  border-radius: var(--radius-sm) !important;
-  transition: all 0.15s ease !important;
-}
-.cf-btn-orange:hover:not(:disabled) {
-  background: var(--sds-color-background-brand-hover, #ea7314) !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(246, 130, 31, 0.3) !important;
-}
-.cf-btn-orange:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.cf-btn-ghost {
-  background: var(--cf-card-bg);
-  color: var(--cf-text);
-  border: 1px solid var(--cf-border);
-  border-radius: var(--radius-sm);
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  transition: all 0.15s;
-}
-.cf-btn-ghost:hover:not(:disabled) {
-  background: var(--cf-inset);
-  border-color: var(--cf-border-strong);
-  color: var(--cf-text-strong);
 }
 
 /* --------------------------------------------------------------------------
@@ -512,40 +498,7 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
 .signal-bar.bar-2 { height: 7px; }
 .signal-bar.bar-3 { height: 10px; }
 .signal-bar.bar-4 { height: 14px; }
-.signal-bar.active { background: var(--cf-orange); }
-
-/* --------------------------------------------------------------------------
-   Data Tables
-   -------------------------------------------------------------------------- */
-.cf-table-wrapper {
-  overflow-x: auto;
-  border: 1px solid var(--cf-border);
-  border-radius: var(--radius-cf);
-  background: var(--cf-card-bg);
-}
-.cf-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.825rem;
-  text-align: left;
-}
-.cf-table th {
-  background: var(--cf-inset);
-  color: var(--cf-text-faint);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.725rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--cf-border);
-}
-.cf-table td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--cf-border-subtle);
-  color: var(--cf-text);
-}
-.cf-table tr:hover td { background: var(--cf-card-elev); }
-.cf-table tr:last-child td { border-bottom: none; }
+.signal-bar.active { background: var(--cf-blue); }
 
 /* --------------------------------------------------------------------------
    GPIO Grid & Controls
@@ -573,7 +526,7 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
 }
 .cf-gpio-card:hover { border-color: var(--cf-border-strong); }
 .cf-gpio-card.active {
-  border-color: var(--cf-orange);
+  border-color: var(--cf-blue);
   background: var(--cf-card-elev);
 }
 
@@ -625,7 +578,7 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
   gap: 2px;
 }
 .cf-bottom-nav-item.active {
-  color: var(--cf-orange);
+  color: var(--cf-blue);
   font-weight: 600;
 }
 .cf-bottom-nav-item svg { transition: transform 0.15s ease; }
@@ -649,8 +602,8 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
 .cf-quick-action-pill:hover,
 .cf-quick-action-pill:active {
   background: var(--cf-card-elev);
-  border-color: var(--cf-orange);
-  color: var(--cf-orange);
+  border-color: var(--cf-blue);
+  color: var(--cf-blue);
 }
 
 @media (max-width: 640px) {

@@ -9,6 +9,10 @@ import {
   Button,
   ButtonGroup,
   Banner,
+  Tabs,
+  Input,
+  Table,
+  Switch,
 } from "@cloudflare/kumo";
 import {
   Bluetooth,
@@ -961,6 +965,190 @@ export function Dashboard({
     return { linePath, areaPath };
   }, [rssiHistory]);
 
+  const mainTabs = useMemo(
+    () => [
+      {
+        value: "overview",
+        label: (
+          <span className="flex items-center gap-1.5" title="Overview · System health & BLE GATT status">
+            <Broadcast size={13} />
+            <span>Overview</span>
+          </span>
+        ),
+      },
+      {
+        value: "tools",
+        label: (
+          <span className="flex items-center gap-1.5" title="Network Tools · 1.1.1.1 DNS, BGP ASN, cURL & Ping">
+            <Globe size={13} />
+            <span>Tools</span>
+          </span>
+        ),
+      },
+      {
+        value: "hardware",
+        label: (
+          <span className="flex items-center gap-1.5" title="Hardware · ESP32-S3 SRAM, PSRAM, Flash & RTC">
+            <Cpu size={13} />
+            <span>HW</span>
+          </span>
+        ),
+      },
+      {
+        value: "console",
+        label: (
+          <span className="flex items-center gap-1.5" title="Logs · Real-time Workers Tail GATT serial console">
+            <Terminal size={13} />
+            <span>Logs</span>
+            {logs.length > 0 && <span className="cf-segmented-count">{logs.length}</span>}
+          </span>
+        ),
+      },
+      {
+        value: "gpio",
+        label: (
+          <span className="flex items-center gap-1.5" title="GPIO · Output header pins & status LED 48">
+            <SlidersHorizontal size={13} />
+            <span>GPIO</span>
+          </span>
+        ),
+      },
+      {
+        value: "wifi",
+        label: (
+          <span className="flex items-center gap-1.5" title="Wi-Fi · 2.4 GHz RF scanner & credential provisioning">
+            <WifiHigh size={13} />
+            <span>Wi-Fi</span>
+            {scanResults.length > 0 && (
+              <span className="cf-segmented-count">{scanResults.length}</span>
+            )}
+          </span>
+        ),
+      },
+      {
+        value: "profiles",
+        label: (
+          <span className="flex items-center gap-1.5" title="Profiles · Stored Wi-Fi networks in Cloudflare D1">
+            <HardDrives size={13} />
+            <span>Profiles</span>
+            {profiles.length > 0 && (
+              <span className="cf-segmented-count">{profiles.length}</span>
+            )}
+          </span>
+        ),
+      },
+      {
+        value: "devices",
+        label: (
+          <span className="flex items-center gap-1.5" title="Devices · Registered ESP32 inventory & MAC addresses">
+            <Database size={13} />
+            <span>Devices</span>
+            {devices.length > 0 && (
+              <span className="cf-segmented-count">{devices.length}</span>
+            )}
+          </span>
+        ),
+      },
+      {
+        value: "history",
+        label: (
+          <span className="flex items-center gap-1.5" title="Audit · Cryptographic SQLite audit trail & event history">
+            <ClockCounterClockwise size={13} />
+            <span>Audit</span>
+            {history.length > 0 && (
+              <span className="cf-segmented-count">{history.length}</span>
+            )}
+          </span>
+        ),
+      },
+      {
+        value: "settings",
+        label: (
+          <span className="flex items-center gap-1.5" title="Settings · Light/Dark theme, PWA installation & workspace config">
+            <Gear size={13} />
+            <span>Settings</span>
+          </span>
+        ),
+      },
+    ],
+    [logs.length, scanResults.length, profiles.length, devices.length, history.length],
+  );
+
+  const toolTabs = useMemo(
+    () => [
+      {
+        value: "dns",
+        label: (
+          <span className="flex items-center gap-1.5" title="1.1.1.1 DNS over HTTPS lookup & record inspection">
+            <Globe size={13} />
+            <span>DNS</span>
+          </span>
+        ),
+      },
+      {
+        value: "ip",
+        label: (
+          <span className="flex items-center gap-1.5" title="Hurricane Electric (he.net) BGP ASN & GeoIP WHOIS">
+            <ShieldCheck size={13} />
+            <span>BGP ASN</span>
+          </span>
+        ),
+      },
+      {
+        value: "http",
+        label: (
+          <span className="flex items-center gap-1.5" title="HTTP & cURL Edge Prober">
+            <FileText size={13} />
+            <span>cURL</span>
+          </span>
+        ),
+      },
+      {
+        value: "ping",
+        label: (
+          <span className="flex items-center gap-1.5" title="Round-Trip Ping & RTT Latency">
+            <Pulse size={13} />
+            <span>Ping</span>
+          </span>
+        ),
+      },
+    ],
+    [],
+  );
+
+  const themeTabs = useMemo(
+    () => [
+      {
+        value: "light",
+        label: (
+          <span className="flex items-center gap-1.5">
+            <Sun size={13} className="text-amber-500" />
+            <span>Light</span>
+          </span>
+        ),
+      },
+      {
+        value: "dark",
+        label: (
+          <span className="flex items-center gap-1.5">
+            <Moon size={13} className="text-sky-400" />
+            <span>Dark</span>
+          </span>
+        ),
+      },
+      {
+        value: "system",
+        label: (
+          <span className="flex items-center gap-1.5">
+            <Desktop size={13} />
+            <span>System ({resolvedTheme})</span>
+          </span>
+        ),
+      },
+    ],
+    [resolvedTheme],
+  );
+
   return (
     <div className="cf-app-shell bg-[var(--cf-bg)] text-[var(--cf-text)]">
       {/* ====================================================================
@@ -973,7 +1161,7 @@ export function Dashboard({
             className="flex items-center gap-2.5 cursor-pointer select-none group"
             title="ESP32 Remote · Direct Edge Web Bluetooth"
           >
-            <div className="w-7 h-7 rounded-md bg-[var(--cf-card-elev)] border border-[var(--cf-border-strong)] flex items-center justify-center text-[var(--cf-orange)] shadow-xs group-hover:border-[var(--cf-orange)] transition-colors">
+            <div className="w-7 h-7 rounded-md bg-[var(--cf-card-elev)] border border-[var(--cf-border-strong)] flex items-center justify-center text-[var(--cf-blue)] shadow-xs group-hover:border-[var(--cf-blue)] transition-colors">
               <Cpu size={16} weight="bold" />
             </div>
             <div className="flex items-center gap-2">
@@ -1003,34 +1191,37 @@ export function Dashboard({
         <div className="flex items-center gap-2 sm:gap-3">
           {/* PWA Install Button */}
           {canInstall && !isStandalone && (
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={handleInstallPwa}
-              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded bg-[var(--cf-orange)] hover:bg-[var(--cf-orange-hover)] text-white transition-all shadow-xs"
+              icon={DownloadSimple}
               title="Install ESP32 Remote as standalone PWA"
             >
-              <DownloadSimple size={14} weight="bold" />
               <span className="hidden sm:inline">Install App</span>
-            </button>
+            </Button>
           )}
 
           {/* Quick Connect / Status Pill */}
-          <button
+          <Button
+            variant={connected ? "secondary" : "primary"}
+            size="sm"
             onClick={handleConnect}
             disabled={connecting || !bluetoothSupported}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all ${
-              connected
-                ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25"
-                : connecting
-                  ? "bg-amber-500/15 border border-amber-500/30 text-amber-400"
-                  : "cf-btn-orange"
-            }`}
+            icon={Bluetooth}
             title={connected ? "Click to disconnect" : "Connect ESP32 via Bluetooth"}
+            className={
+              connected
+                ? "!text-emerald-400 !border-emerald-500/30 !bg-emerald-500/10 hover:!bg-emerald-500/20"
+                : connecting
+                  ? "!text-amber-400 !border-amber-500/30 !bg-amber-500/10"
+                  : ""
+            }
           >
-            <Bluetooth size={14} weight="bold" />
             <span className="hidden xs:inline">
               {connected ? "Connected" : connecting ? "Pairing..." : "Connect"}
             </span>
-          </button>
+          </Button>
 
           {/* Theme Switcher Toggle */}
           <button
@@ -1061,7 +1252,7 @@ export function Dashboard({
             <span className="text-[var(--cf-text-muted)] hidden sm:inline">Workers /</span>
             <span className="text-[var(--cf-text-strong)] font-semibold">esp32-remote</span>
             <span className="text-[var(--cf-text-faint)]">/</span>
-            <span className="text-[var(--cf-orange)] font-mono text-[11px] capitalize">
+            <span className="text-[var(--cf-blue)] font-mono text-[11px] capitalize">
               {activeTab}
             </span>
           </div>
@@ -1072,7 +1263,7 @@ export function Dashboard({
                 type="checkbox"
                 checked={acceptAllDevices}
                 onChange={(e) => setAcceptAllDevices(e.target.checked)}
-                className="rounded accent-[var(--cf-orange)]"
+                className="rounded accent-[var(--cf-blue)]"
               />
               <span>All devices</span>
             </label>
@@ -1088,122 +1279,16 @@ export function Dashboard({
           </div>
         </div>
 
-        {/* Figma SDS & Cloudflare Kumo Segmented Control Navigation (10 Compact Tabs) */}
+        {/* Cloudflare Kumo Segmented Control Navigation (10 Compact Tabs) */}
         <div className="pb-2.5 overflow-x-auto scrollbar-none -mx-2 px-2 sm:mx-0 sm:px-0">
-          <nav className="navigation cf-segmented-nav flex" aria-label="Main Navigation">
-            <button
-              onClick={() => navigateTab("overview")}
-              data-selected={activeTab === "overview" ? true : undefined}
-              className={`navigation-pill cf-segmented-btn ${activeTab === "overview" ? "active" : ""}`}
-              title="Overview · System health, BLE GATT status & quick actions"
-            >
-              <Broadcast size={13} />
-              <span>Overview</span>
-            </button>
-
-            <button
-              onClick={() => navigateTab("tools")}
-              data-selected={activeTab === "tools" ? true : undefined}
-              className={`navigation-pill cf-segmented-btn ${activeTab === "tools" ? "active" : ""}`}
-              title="Network Tools · 1.1.1.1 DNS, BGP ASN WHOIS, cURL & Ping"
-            >
-              <Globe size={13} />
-              <span>Tools</span>
-            </button>
-
-            <button
-              onClick={() => navigateTab("hardware")}
-              data-selected={activeTab === "hardware" ? true : undefined}
-              className={`navigation-pill cf-segmented-btn ${activeTab === "hardware" ? "active" : ""}`}
-              title="Hardware · ESP32-S3 SRAM, PSRAM, Flash & RTC Clock"
-            >
-              <Cpu size={13} />
-              <span>HW</span>
-            </button>
-
-            <button
-              onClick={() => navigateTab("console")}
-              data-selected={activeTab === "console" ? true : undefined}
-              className={`navigation-pill cf-segmented-btn ${activeTab === "console" ? "active" : ""}`}
-              title="Logs · Real-time Workers Tail GATT serial console"
-            >
-              <Terminal size={13} />
-              <span>Logs</span>
-              {logs.length > 0 && <span className="cf-segmented-count">{logs.length}</span>}
-            </button>
-
-            <button
-              onClick={() => navigateTab("gpio")}
-              data-selected={activeTab === "gpio" ? true : undefined}
-              className={`navigation-pill cf-segmented-btn ${activeTab === "gpio" ? "active" : ""}`}
-              title="GPIO · Output header pins & status LED 48"
-            >
-              <SlidersHorizontal size={13} />
-              <span>GPIO</span>
-            </button>
-
-            <button
-              onClick={() => navigateTab("wifi")}
-              data-selected={activeTab === "wifi" ? true : undefined}
-              className={`navigation-pill cf-segmented-btn ${activeTab === "wifi" ? "active" : ""}`}
-              title="Wi-Fi · 2.4 GHz RF scanner & credential provisioning"
-            >
-              <WifiHigh size={13} />
-              <span>Wi-Fi</span>
-              {scanResults.length > 0 && (
-                <span className="cf-segmented-count">{scanResults.length}</span>
-              )}
-            </button>
-
-            <button
-              onClick={() => navigateTab("profiles")}
-              data-selected={activeTab === "profiles" ? true : undefined}
-              className={`navigation-pill cf-segmented-btn ${activeTab === "profiles" ? "active" : ""}`}
-              title="Profiles · Stored Wi-Fi networks in Cloudflare D1"
-            >
-              <HardDrives size={13} />
-              <span>Profiles</span>
-              {profiles.length > 0 && (
-                <span className="cf-segmented-count">{profiles.length}</span>
-              )}
-            </button>
-
-            <button
-              onClick={() => navigateTab("devices")}
-              data-selected={activeTab === "devices" ? true : undefined}
-              className={`navigation-pill cf-segmented-btn ${activeTab === "devices" ? "active" : ""}`}
-              title="Devices · Registered ESP32 inventory & MAC addresses"
-            >
-              <Database size={13} />
-              <span>Devices</span>
-              {devices.length > 0 && (
-                <span className="cf-segmented-count">{devices.length}</span>
-              )}
-            </button>
-
-            <button
-              onClick={() => navigateTab("history")}
-              data-selected={activeTab === "history" ? true : undefined}
-              className={`navigation-pill cf-segmented-btn ${activeTab === "history" ? "active" : ""}`}
-              title="Audit · Cryptographic SQLite audit trail & event history"
-            >
-              <ClockCounterClockwise size={13} />
-              <span>Audit</span>
-              {history.length > 0 && (
-                <span className="cf-segmented-count">{history.length}</span>
-              )}
-            </button>
-
-            <button
-              onClick={() => navigateTab("settings")}
-              data-selected={activeTab === "settings" ? true : undefined}
-              className={`navigation-pill cf-segmented-btn ${activeTab === "settings" ? "active" : ""}`}
-              title="Settings · Light/Dark theme, PWA installation & workspace config"
-            >
-              <Gear size={13} />
-              <span>Settings</span>
-            </button>
-          </nav>
+          <Tabs
+            variant="segmented"
+            size="sm"
+            value={activeTab}
+            onValueChange={(val) => navigateTab(val as TabType)}
+            tabs={mainTabs}
+            className="w-full"
+          />
         </div>
       </section>
 
@@ -1228,7 +1313,7 @@ export function Dashboard({
             <div className="cf-metrics-grid">
               <div className={`cf-metric-card ${connected ? "highlight" : ""}`}>
                 <div className="cf-metric-label">
-                  <Bluetooth size={13} className="text-[var(--cf-orange)]" />
+                  <Bluetooth size={13} className="text-[var(--cf-blue)]" />
                   <span>BLE Link</span>
                 </div>
                 <div className="cf-metric-value">
@@ -1315,62 +1400,67 @@ export function Dashboard({
             {/* Instant One-Tap Quick Actions Bar */}
             <div className="p-3 rounded-lg bg-[var(--cf-card-bg)] border border-[var(--cf-border)] flex items-center justify-between gap-2 overflow-x-auto scrollbar-none">
               <span className="text-xs font-semibold text-[var(--cf-text-strong)] flex items-center gap-1.5 shrink-0">
-                <Lightning size={14} className="text-[var(--cf-orange)]" />
+                <Lightning size={14} className="text-[var(--cf-blue)]" />
                 <span className="hidden xs:inline">Quick Actions:</span>
               </span>
 
               <div className="flex items-center gap-2 shrink-0">
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={handlePing}
                   disabled={!connected}
-                  className="cf-quick-action-pill disabled:opacity-40"
+                  icon={Lightning}
                   title="Send PING probe over BLE GATT"
                 >
-                  <Lightning size={13} className="text-amber-400" />
                   <span>Ping</span>
-                </button>
+                </Button>
 
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={handleStatus}
                   disabled={!connected}
-                  className="cf-quick-action-pill disabled:opacity-40"
+                  icon={Broadcast}
                   title="Query Wi-Fi status & RSSI"
                 >
-                  <Broadcast size={13} className="text-emerald-400" />
                   <span>Status</span>
-                </button>
+                </Button>
 
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={handleToggleLed}
                   disabled={!connected}
-                  className="cf-quick-action-pill disabled:opacity-40"
+                  icon={Power}
                   title="Toggle onboard GPIO 48 LED"
                 >
-                  <Power size={13} className="text-purple-400" />
                   <span>LED</span>
-                </button>
+                </Button>
 
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => {
                     navigateTab("wifi");
                     handleScanWifi();
                   }}
                   disabled={!connected}
-                  className="cf-quick-action-pill disabled:opacity-40"
+                  icon={WifiHigh}
                   title="Scan 2.4 GHz Wi-Fi channels"
                 >
-                  <WifiHigh size={13} className="text-cyan-400" />
                   <span>Scan</span>
-                </button>
+                </Button>
 
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => navigateTab("tools")}
-                  className="cf-quick-action-pill"
+                  icon={Globe}
                   title="Open Network Diagnostics"
                 >
-                  <Globe size={13} className="text-sky-400" />
                   <span>Tools</span>
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -1380,7 +1470,7 @@ export function Dashboard({
               <div className="cf-card lg:col-span-2 !p-3">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <ChartLineUp size={16} className="text-[var(--cf-orange)]" />
+                    <ChartLineUp size={16} className="text-[var(--cf-blue)]" />
                     <span className="text-xs font-bold text-[var(--cf-text-strong)]">
                       Wi-Fi Signal Strength Timeline (2.4 GHz RF Link)
                     </span>
@@ -1398,9 +1488,9 @@ export function Dashboard({
                     className="cf-analytics-chart w-full h-full"
                   >
                     <defs>
-                      <linearGradient id="cf-orange-gradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#f6821f" stopOpacity="0.4" />
-                        <stop offset="100%" stopColor="#f6821f" stopOpacity="0.0" />
+                      <linearGradient id="cf-blue-gradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#0051c3" stopOpacity="0.35" />
+                        <stop offset="100%" stopColor="#0051c3" stopOpacity="0.0" />
                       </linearGradient>
                     </defs>
                     <g className="cf-chart-grid">
@@ -1472,7 +1562,7 @@ export function Dashboard({
             <div className="cf-card">
               <div className="cf-card-header !py-2.5">
                 <div className="cf-card-title text-xs">
-                  <Cpu size={15} className="text-[var(--cf-orange)]" />
+                  <Cpu size={15} className="text-[var(--cf-blue)]" />
                   <span>ESP32-S3 Peripheral &amp; GATT Context</span>
                 </div>
                 <div className="text-xs font-mono text-[var(--cf-text-muted)]">
@@ -1480,40 +1570,40 @@ export function Dashboard({
                 </div>
               </div>
               <div className="cf-card-body p-0 overflow-x-auto">
-                <table className="table table-dense cf-table text-xs">
-                  <tbody>
-                    <tr>
-                      <td className="font-semibold text-[var(--cf-text-muted)] w-1/3">
+                <Table>
+                  <Table.Body>
+                    <Table.Row>
+                      <Table.Cell className="font-semibold text-[var(--cf-text-muted)] w-1/3">
                         Bluetooth Service
-                      </td>
-                      <td className="font-mono text-sky-400 truncate">{SERVICE_UUID}</td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-[var(--cf-text-muted)]">
+                      </Table.Cell>
+                      <Table.Cell className="font-mono text-sky-400 truncate">{SERVICE_UUID}</Table.Cell>
+                    </Table.Row>
+                    <Table.Row>
+                      <Table.Cell className="font-semibold text-[var(--cf-text-muted)]">
                         Control Characteristic
-                      </td>
-                      <td className="font-mono text-emerald-400 truncate">{CONTROL_UUID}</td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-[var(--cf-text-muted)]">Firmware Build</td>
-                      <td className="font-mono text-[var(--cf-text-strong)]">
+                      </Table.Cell>
+                      <Table.Cell className="font-mono text-emerald-400 truncate">{CONTROL_UUID}</Table.Cell>
+                    </Table.Row>
+                    <Table.Row>
+                      <Table.Cell className="font-semibold text-[var(--cf-text-muted)]">Firmware Build</Table.Cell>
+                      <Table.Cell className="font-mono text-[var(--cf-text-strong)]">
                         v{deviceInfo.fw} (Embassy + Trouble BLE)
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-[var(--cf-text-muted)]">
+                      </Table.Cell>
+                    </Table.Row>
+                    <Table.Row>
+                      <Table.Cell className="font-semibold text-[var(--cf-text-muted)]">
                         Cloudflare Database
-                      </td>
-                      <td className="font-mono text-cyan-400">D1 Binding: env.DB</td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-[var(--cf-text-muted)]">Client Identity</td>
-                      <td className="font-mono text-[var(--cf-text-faint)] truncate max-w-xs">
+                      </Table.Cell>
+                      <Table.Cell className="font-mono text-cyan-400">D1 Binding: env.DB</Table.Cell>
+                    </Table.Row>
+                    <Table.Row>
+                      <Table.Cell className="font-semibold text-[var(--cf-text-muted)]">Client Identity</Table.Cell>
+                      <Table.Cell className="font-mono text-[var(--cf-text-faint)] truncate max-w-xs">
                         {identity.id}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                      </Table.Cell>
+                    </Table.Row>
+                  </Table.Body>
+                </Table>
               </div>
             </div>
           </div>
@@ -1526,47 +1616,13 @@ export function Dashboard({
           <div className="space-y-3">
             {/* Tool Category Selector Segmented Bar */}
             <div className="overflow-x-auto scrollbar-none">
-              <nav className="navigation cf-segmented-nav flex" aria-label="Network Tools Navigation">
-                <button
-                  onClick={() => setToolSubTab("dns")}
-                  data-selected={toolSubTab === "dns" ? true : undefined}
-                  className={`navigation-pill cf-segmented-btn ${toolSubTab === "dns" ? "active" : ""}`}
-                  title="1.1.1.1 DNS over HTTPS lookup & record inspection"
-                >
-                  <Globe size={13} />
-                  <span>DNS</span>
-                </button>
-
-                <button
-                  onClick={() => setToolSubTab("ip")}
-                  data-selected={toolSubTab === "ip" ? true : undefined}
-                  className={`navigation-pill cf-segmented-btn ${toolSubTab === "ip" ? "active" : ""}`}
-                  title="Hurricane Electric (he.net) BGP ASN & GeoIP WHOIS"
-                >
-                  <ShieldCheck size={13} />
-                  <span>BGP ASN</span>
-                </button>
-
-                <button
-                  onClick={() => setToolSubTab("http")}
-                  data-selected={toolSubTab === "http" ? true : undefined}
-                  className={`navigation-pill cf-segmented-btn ${toolSubTab === "http" ? "active" : ""}`}
-                  title="HTTP & cURL Edge Prober"
-                >
-                  <FileText size={13} />
-                  <span>cURL</span>
-                </button>
-
-                <button
-                  onClick={() => setToolSubTab("ping")}
-                  data-selected={toolSubTab === "ping" ? true : undefined}
-                  className={`navigation-pill cf-segmented-btn ${toolSubTab === "ping" ? "active" : ""}`}
-                  title="Round-Trip Ping & RTT Latency"
-                >
-                  <Pulse size={13} />
-                  <span>Ping</span>
-                </button>
-              </nav>
+              <Tabs
+                variant="segmented"
+                size="sm"
+                value={toolSubTab}
+                onValueChange={(val) => setToolSubTab(val as "dns" | "ip" | "http" | "ping")}
+                tabs={toolTabs}
+              />
             </div>
 
             {/* 1. DNS Checker */}
@@ -1574,7 +1630,7 @@ export function Dashboard({
               <div className="cf-card space-y-3 !p-3">
                 <div className="flex items-center justify-between">
                   <div className="text-xs font-bold text-[var(--cf-text-strong)] flex items-center gap-1.5">
-                    <Globe size={14} className="text-[var(--cf-orange)]" />
+                    <Globe size={14} className="text-[var(--cf-blue)]" />
                     <span>DNS Record Lookup (1.1.1.1 DoH)</span>
                   </div>
                   <span className="text-[10px] font-mono text-[var(--cf-text-muted)]">
@@ -1583,12 +1639,13 @@ export function Dashboard({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <input
-                    type="text"
+                  <Input
+                    size="sm"
+                    aria-label="Domain name or FQDN"
                     value={dnsDomain}
                     onChange={(e) => setDnsDomain(e.target.value)}
                     placeholder="Domain (e.g. virt.cc.cd)..."
-                    className="input flex-1 min-w-[180px] text-xs font-mono"
+                    className="flex-1 min-w-[180px] font-mono"
                   />
                   <select
                     value={dnsType}
@@ -1604,9 +1661,12 @@ export function Dashboard({
                     <option value="SOA">SOA</option>
                   </select>
                   <Button
+                    variant="primary"
+                    size="sm"
                     onClick={handleExecuteDns}
                     disabled={dnsLoading || !dnsDomain.trim()}
-                    className="cf-btn-orange text-xs !py-1"
+                    loading={dnsLoading}
+                    icon={Globe}
                   >
                     {dnsLoading ? "Querying..." : "Query DNS"}
                   </Button>
@@ -1630,28 +1690,28 @@ export function Dashboard({
 
                     {dnsResult.answers.length > 0 ? (
                       <div className="overflow-x-auto">
-                        <table className="table table-dense cf-table text-xs">
-                          <thead>
-                            <tr>
-                              <th>Record</th>
-                              <th>Type</th>
-                              <th>TTL</th>
-                              <th>Target / IP</th>
-                            </tr>
-                          </thead>
-                          <tbody>
+                        <Table>
+                          <Table.Header>
+                            <Table.Row>
+                              <Table.Head>Record</Table.Head>
+                              <Table.Head>Type</Table.Head>
+                              <Table.Head>TTL</Table.Head>
+                              <Table.Head>Target / IP</Table.Head>
+                            </Table.Row>
+                          </Table.Header>
+                          <Table.Body>
                             {dnsResult.answers.map((ans, i) => (
-                              <tr key={i}>
-                                <td className="font-mono">{ans.name}</td>
-                                <td className="font-mono font-bold text-sky-400">{dnsResult.type}</td>
-                                <td className="font-mono text-[var(--cf-text-faint)]">{ans.TTL}s</td>
-                                <td className="font-mono font-semibold text-emerald-400">
+                              <Table.Row key={i}>
+                                <Table.Cell className="font-mono">{ans.name}</Table.Cell>
+                                <Table.Cell className="font-mono font-bold text-sky-400">{dnsResult.type}</Table.Cell>
+                                <Table.Cell className="font-mono text-[var(--cf-text-faint)]">{ans.TTL}s</Table.Cell>
+                                <Table.Cell className="font-mono font-semibold text-emerald-400">
                                   {ans.data}
-                                </td>
-                              </tr>
+                                </Table.Cell>
+                              </Table.Row>
                             ))}
-                          </tbody>
-                        </table>
+                          </Table.Body>
+                        </Table>
                       </div>
                     ) : (
                       <div className="text-xs text-[var(--cf-text-faint)] py-1">
@@ -1677,17 +1737,21 @@ export function Dashboard({
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
-                  <input
-                    type="text"
+                  <Input
+                    size="sm"
+                    aria-label="IP or Hostname"
                     value={ipQuery}
                     onChange={(e) => setIpQuery(e.target.value)}
                     placeholder="IP or Hostname (e.g. 1.1.1.1)..."
-                    className="input flex-1 min-w-[200px] text-xs font-mono"
+                    className="flex-1 min-w-[200px] font-mono"
                   />
                   <Button
+                    variant="primary"
+                    size="sm"
                     onClick={handleExecuteIpLookup}
                     disabled={ipLoading || !ipQuery.trim()}
-                    className="cf-btn-orange text-xs !py-1"
+                    loading={ipLoading}
+                    icon={ShieldCheck}
                   >
                     {ipLoading ? "Looking up..." : "Lookup BGP"}
                   </Button>
@@ -1701,7 +1765,7 @@ export function Dashboard({
                           Routing &amp; BGP ASN:
                         </div>
                         <div className="p-2 rounded bg-[var(--cf-card-bg)] border border-[var(--cf-border-subtle)] space-y-1 font-mono text-xs">
-                          <div>ASN: <span className="text-[var(--cf-orange)] font-bold">{ipResult.asn}</span></div>
+                          <div>ASN: <span className="text-[var(--cf-blue)] font-bold">{ipResult.asn}</span></div>
                           <div>ISP: <span className="text-sky-400">{ipResult.isp}</span></div>
                           <div>Org: <span>{ipResult.org}</span></div>
                           <div>IP: <span>{ipResult.type}</span></div>
@@ -1765,17 +1829,21 @@ export function Dashboard({
                     <option value="POST">POST</option>
                     <option value="HEAD">HEAD</option>
                   </select>
-                  <input
-                    type="text"
+                  <Input
+                    size="sm"
+                    aria-label="Target HTTP or HTTPS URL"
                     value={httpTargetUrl}
                     onChange={(e) => setHttpTargetUrl(e.target.value)}
                     placeholder="Target URL..."
-                    className="input flex-1 min-w-[200px] text-xs font-mono"
+                    className="flex-1 min-w-[200px] font-mono"
                   />
                   <Button
+                    variant="primary"
+                    size="sm"
                     onClick={handleExecuteHttp}
                     disabled={httpLoading || !httpTargetUrl.trim()}
-                    className="cf-btn-orange text-xs !py-1"
+                    loading={httpLoading}
+                    icon={FileText}
                   >
                     {httpLoading ? "Fetching..." : "Run cURL"}
                   </Button>
@@ -1801,20 +1869,20 @@ export function Dashboard({
                         Headers:
                       </div>
                       <div className="max-h-32 overflow-y-auto border border-[var(--cf-border-subtle)] rounded">
-                        <table className="table table-dense cf-table text-[11px]">
-                          <tbody>
+                        <Table>
+                          <Table.Body>
                             {Object.entries(httpResult.headers).map(([k, v]) => (
-                              <tr key={k}>
-                                <td className="font-mono text-[var(--cf-text-muted)] font-semibold w-1/3">
+                              <Table.Row key={k}>
+                                <Table.Cell className="font-mono text-[var(--cf-text-muted)] font-semibold w-1/3">
                                   {k}
-                                </td>
-                                <td className="font-mono text-[var(--cf-text-strong)] truncate max-w-sm">
+                                </Table.Cell>
+                                <Table.Cell className="font-mono text-[var(--cf-text-strong)] truncate max-w-sm">
                                   {v}
-                                </td>
-                              </tr>
+                                </Table.Cell>
+                              </Table.Row>
                             ))}
-                          </tbody>
-                        </table>
+                          </Table.Body>
+                        </Table>
                       </div>
                     </div>
 
@@ -1846,17 +1914,21 @@ export function Dashboard({
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
-                  <input
-                    type="text"
+                  <Input
+                    size="sm"
+                    aria-label="Host to ping"
                     value={pingTarget}
                     onChange={(e) => setPingTarget(e.target.value)}
                     placeholder="Host to ping (e.g. 1.1.1.1)..."
-                    className="input flex-1 min-w-[180px] text-xs font-mono"
+                    className="flex-1 min-w-[180px] font-mono"
                   />
                   <Button
+                    variant="primary"
+                    size="sm"
                     onClick={handleExecutePingTest}
                     disabled={pingRunning}
-                    className="cf-btn-orange text-xs !py-1"
+                    loading={pingRunning}
+                    icon={Pulse}
                   >
                     {pingRunning ? "Pinging..." : "Send Ping"}
                   </Button>
@@ -1881,7 +1953,7 @@ export function Dashboard({
                           </span>
                           <div
                             style={{ height: `${h}%` }}
-                            className="w-full bg-[var(--cf-orange)] rounded-t transition-all"
+                            className="w-full bg-[var(--cf-blue)] rounded-t transition-all"
                           />
                         </div>
                       );
@@ -1909,14 +1981,13 @@ export function Dashboard({
                       {clockSynced ? "NTP Synced" : "Local RTC"}
                     </Badge>
                   </div>
-                  <div className="font-mono text-sm text-[var(--cf-orange)] font-bold mt-0.5">
+                  <div className="font-mono text-sm text-[var(--cf-blue)] font-bold mt-0.5">
                     {deviceClock.toUTCString()}
                   </div>
                 </div>
               </div>
 
-              <Button onClick={handleSyncTime} size="sm" className="cf-btn-orange text-xs">
-                <ArrowsClockwise size={13} className="mr-1" />
+              <Button variant="primary" size="sm" onClick={handleSyncTime} icon={ArrowsClockwise}>
                 Sync Browser Time
               </Button>
             </div>
@@ -1987,7 +2058,7 @@ export function Dashboard({
 
                 {/* Partition bar */}
                 <div className="w-full h-4 rounded-full overflow-hidden bg-[var(--cf-inset)] border border-[var(--cf-border)] flex">
-                  <div style={{ width: "5.33%" }} className="bg-[var(--cf-orange)]" title="Factory App: 874KB" />
+                  <div style={{ width: "5.33%" }} className="bg-[var(--cf-blue)]" title="Factory App: 874KB" />
                   <div style={{ width: "0.2%" }} className="bg-purple-500" title="NVS: 24KB" />
                   <div style={{ width: "0.05%" }} className="bg-sky-500" title="PHY: 4KB" />
                   <div style={{ width: "94.42%" }} className="bg-transparent" title="Free: 15.1MB" />
@@ -1995,42 +2066,42 @@ export function Dashboard({
 
                 {/* Legend Table */}
                 <div className="overflow-x-auto">
-                  <table className="table table-dense cf-table text-xs">
-                    <thead>
-                      <tr>
-                        <th>Partition Name</th>
-                        <th>Type / Usage</th>
-                        <th>Offset</th>
-                        <th>Allocated Size</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="font-semibold text-amber-400">factory (Active App)</td>
-                        <td>Factory firmware binary</td>
-                        <td className="font-mono">0x00010000</td>
-                        <td className="font-mono">873,984 bytes (5.33%)</td>
-                      </tr>
-                      <tr>
-                        <td className="font-semibold text-purple-400">nvs (Credentials)</td>
-                        <td>Wi-Fi credentials &amp; persistent keys</td>
-                        <td className="font-mono">0x00009000</td>
-                        <td className="font-mono">24 KB</td>
-                      </tr>
-                      <tr>
-                        <td className="font-semibold text-sky-400">phy_init</td>
-                        <td>RF radio calibration data</td>
-                        <td className="font-mono">0x0000f000</td>
-                        <td className="font-mono">4 KB</td>
-                      </tr>
-                      <tr>
-                        <td className="font-semibold text-[var(--cf-text-faint)]">Unallocated / Free</td>
-                        <td>Available for OTA or storage</td>
-                        <td className="font-mono">—</td>
-                        <td className="font-mono">~15.4 MB (94.5%)</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <Table>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.Head>Partition Name</Table.Head>
+                        <Table.Head>Type / Usage</Table.Head>
+                        <Table.Head>Offset</Table.Head>
+                        <Table.Head>Allocated Size</Table.Head>
+                      </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
+                      <Table.Row>
+                        <Table.Cell className="font-semibold text-amber-400">factory (Active App)</Table.Cell>
+                        <Table.Cell>Factory firmware binary</Table.Cell>
+                        <Table.Cell className="font-mono">0x00010000</Table.Cell>
+                        <Table.Cell className="font-mono">873,984 bytes (5.33%)</Table.Cell>
+                      </Table.Row>
+                      <Table.Row>
+                        <Table.Cell className="font-semibold text-purple-400">nvs (Credentials)</Table.Cell>
+                        <Table.Cell>Wi-Fi credentials &amp; persistent keys</Table.Cell>
+                        <Table.Cell className="font-mono">0x00009000</Table.Cell>
+                        <Table.Cell className="font-mono">24 KB</Table.Cell>
+                      </Table.Row>
+                      <Table.Row>
+                        <Table.Cell className="font-semibold text-sky-400">phy_init</Table.Cell>
+                        <Table.Cell>RF radio calibration data</Table.Cell>
+                        <Table.Cell className="font-mono">0x0000f000</Table.Cell>
+                        <Table.Cell className="font-mono">4 KB</Table.Cell>
+                      </Table.Row>
+                      <Table.Row>
+                        <Table.Cell className="font-semibold text-[var(--cf-text-faint)]">Unallocated / Free</Table.Cell>
+                        <Table.Cell>Available for OTA or storage</Table.Cell>
+                        <Table.Cell className="font-mono">—</Table.Cell>
+                        <Table.Cell className="font-mono">~15.4 MB (94.5%)</Table.Cell>
+                      </Table.Row>
+                    </Table.Body>
+                  </Table>
                 </div>
               </div>
             </div>
@@ -2048,42 +2119,42 @@ export function Dashboard({
               </div>
 
               <div className="cf-card-body p-0 overflow-x-auto">
-                <table className="table table-dense cf-table text-xs">
-                  <thead>
-                    <tr>
-                      <th>Table Name</th>
-                      <th>Storage Role</th>
-                      <th>Current Records</th>
-                      <th>State</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="font-mono font-semibold text-sky-400">devices</td>
-                      <td>ESP32 hardware registration &amp; MAC inventory</td>
-                      <td className="font-mono">{edgeStats?.devicesCount ?? devices.length}</td>
-                      <td><Badge variant="success" className="text-[10px]">Active</Badge></td>
-                    </tr>
-                    <tr>
-                      <td className="font-mono font-semibold text-emerald-400">wifi_profiles</td>
-                      <td>Encrypted WPA2/WPA3 access point profiles</td>
-                      <td className="font-mono">{edgeStats?.profilesCount ?? profiles.length}</td>
-                      <td><Badge variant="success" className="text-[10px]">Active</Badge></td>
-                    </tr>
-                    <tr>
-                      <td className="font-mono font-semibold text-purple-400">history</td>
-                      <td>Immutable GATT command audit trail</td>
-                      <td className="font-mono">{edgeStats?.historyCount ?? history.length}</td>
-                      <td><Badge variant="success" className="text-[10px]">Active</Badge></td>
-                    </tr>
-                    <tr>
-                      <td className="font-mono font-semibold text-amber-400">settings</td>
-                      <td>User workspace &amp; UI configuration</td>
-                      <td className="font-mono">{edgeStats?.settingsCount ?? 4}</td>
-                      <td><Badge variant="success" className="text-[10px]">Active</Badge></td>
-                    </tr>
-                  </tbody>
-                </table>
+                <Table>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.Head>Table Name</Table.Head>
+                      <Table.Head>Storage Role</Table.Head>
+                      <Table.Head>Current Records</Table.Head>
+                      <Table.Head>State</Table.Head>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    <Table.Row>
+                      <Table.Cell className="font-mono font-semibold text-sky-400">devices</Table.Cell>
+                      <Table.Cell>ESP32 hardware registration &amp; MAC inventory</Table.Cell>
+                      <Table.Cell className="font-mono">{edgeStats?.devicesCount ?? devices.length}</Table.Cell>
+                      <Table.Cell><Badge variant="success" className="text-[10px]">Active</Badge></Table.Cell>
+                    </Table.Row>
+                    <Table.Row>
+                      <Table.Cell className="font-mono font-semibold text-emerald-400">wifi_profiles</Table.Cell>
+                      <Table.Cell>Encrypted WPA2/WPA3 access point profiles</Table.Cell>
+                      <Table.Cell className="font-mono">{edgeStats?.profilesCount ?? profiles.length}</Table.Cell>
+                      <Table.Cell><Badge variant="success" className="text-[10px]">Active</Badge></Table.Cell>
+                    </Table.Row>
+                    <Table.Row>
+                      <Table.Cell className="font-mono font-semibold text-purple-400">history</Table.Cell>
+                      <Table.Cell>Immutable GATT command audit trail</Table.Cell>
+                      <Table.Cell className="font-mono">{edgeStats?.historyCount ?? history.length}</Table.Cell>
+                      <Table.Cell><Badge variant="success" className="text-[10px]">Active</Badge></Table.Cell>
+                    </Table.Row>
+                    <Table.Row>
+                      <Table.Cell className="font-mono font-semibold text-amber-400">settings</Table.Cell>
+                      <Table.Cell>User workspace &amp; UI configuration</Table.Cell>
+                      <Table.Cell className="font-mono">{edgeStats?.settingsCount ?? 4}</Table.Cell>
+                      <Table.Cell><Badge variant="success" className="text-[10px]">Active</Badge></Table.Cell>
+                    </Table.Row>
+                  </Table.Body>
+                </Table>
               </div>
             </div>
           </div>
@@ -2096,7 +2167,7 @@ export function Dashboard({
           <div className="cf-card !p-0 overflow-hidden flex flex-col">
             <div className="p-2.5 sm:p-3 bg-[var(--cf-term-header)] border-b border-[var(--cf-border)] flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2">
-                <Terminal size={15} className="text-[var(--cf-orange)]" />
+                <Terminal size={15} className="text-[var(--cf-blue)]" />
                 <span className="text-xs font-semibold text-[var(--cf-text-strong)]">
                   Workers Tail GATT Stream
                 </span>
@@ -2107,15 +2178,16 @@ export function Dashboard({
 
               <div className="flex items-center gap-2">
                 <div className="relative">
-                  <input
-                    type="text"
+                  <Input
+                    size="sm"
+                    aria-label="Filter logs"
                     value={logFilter}
                     onChange={(e) => {
                       setLogFilter(e.target.value);
                       syncSubStateToUrl("filter", e.target.value);
                     }}
                     placeholder="Filter logs..."
-                    className="bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2.5 py-1 text-xs text-[var(--cf-text)] placeholder-[var(--cf-text-faint)] w-32 sm:w-44 focus:outline-none focus:border-[var(--cf-orange)]"
+                    className="w-32 sm:w-44 font-mono"
                   />
                   {logFilter && (
                     <button
@@ -2138,18 +2210,18 @@ export function Dashboard({
                       setAutoScroll(e.target.checked);
                       syncSubStateToUrl("autoscroll", e.target.checked ? "1" : "0");
                     }}
-                    className="rounded accent-[var(--cf-orange)]"
+                    className="rounded accent-[var(--cf-blue)]"
                   />
                   <span className="hidden sm:inline">Autoscroll</span>
                 </label>
 
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => setLogs([])}
-                  className="p-1.5 text-xs text-[var(--cf-text-muted)] hover:text-red-400 transition-colors"
+                  icon={Trash}
                   title="Clear log window"
-                >
-                  <Trash size={14} />
-                </button>
+                />
               </div>
             </div>
 
@@ -2170,11 +2242,12 @@ export function Dashboard({
               onSubmit={handleManualCommandSubmit}
               className="p-2 sm:p-2.5 bg-[var(--cf-term-header)] border-t border-[var(--cf-border)] flex items-center gap-2"
             >
-              <div className="font-mono text-xs font-bold text-[var(--cf-orange)] pl-1 select-none">
+              <div className="font-mono text-xs font-bold text-[var(--cf-blue)] pl-1 select-none">
                 TX &gt;
               </div>
-              <input
-                type="text"
+              <Input
+                size="sm"
+                aria-label="GATT Console Command"
                 value={commandInput}
                 onChange={(e) => setCommandInput(e.target.value)}
                 placeholder={
@@ -2183,14 +2256,15 @@ export function Dashboard({
                     : "Connect Bluetooth to send command..."
                 }
                 disabled={!connected}
-                className="input flex-1 text-xs font-mono"
+                className="flex-1 font-mono"
               />
               <Button
+                variant="primary"
+                size="sm"
                 type="submit"
                 disabled={!connected || !commandInput.trim()}
-                className="cf-btn-orange text-xs !py-1.5"
+                icon={PaperPlaneRight}
               >
-                <PaperPlaneRight size={13} className="mr-1" />
                 <span>Send</span>
               </Button>
             </form>
@@ -2218,20 +2292,30 @@ export function Dashboard({
                 </div>
               </div>
 
-              <Button
-                onClick={handleToggleLed}
-                disabled={!connected}
-                size="sm"
-                className="cf-btn-orange text-xs"
-              >
-                Toggle LED 48
-              </Button>
+              <div className="flex items-center gap-2">
+                <Switch
+                  size="sm"
+                  label="Status LED"
+                  checked={deviceInfo.led === "1"}
+                  onCheckedChange={handleToggleLed}
+                  disabled={!connected}
+                />
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleToggleLed}
+                  disabled={!connected}
+                  icon={Power}
+                >
+                  Toggle LED 48
+                </Button>
+              </div>
             </div>
 
             <div className="cf-card">
               <div className="cf-card-header !py-3">
                 <div className="cf-card-title text-sm">
-                  <SlidersHorizontal size={15} className="text-[var(--cf-orange)]" />
+                  <SlidersHorizontal size={15} className="text-[var(--cf-blue)]" />
                   <span>Physical Output Header Pins</span>
                 </div>
                 <div className="text-xs text-[var(--cf-text-muted)]">3.3V Logic Level</div>
@@ -2263,28 +2347,24 @@ export function Dashboard({
                         </div>
 
                         <div className="flex items-center gap-1">
-                          <button
+                          <Button
+                            variant={isHigh ? "primary" : "secondary"}
+                            size="sm"
                             onClick={() => handleSetGpio(pin, true)}
                             disabled={!connected}
-                            className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all ${
-                              isHigh
-                                ? "bg-emerald-600 text-white"
-                                : "bg-[var(--cf-card-bg)] border border-[var(--cf-border)] text-[var(--cf-text-muted)] hover:text-white"
-                            } disabled:opacity-40`}
+                            className="!text-[11px] !py-0.5 !px-2"
                           >
                             HIGH
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant={!isHigh ? "secondary" : "ghost"}
+                            size="sm"
                             onClick={() => handleSetGpio(pin, false)}
                             disabled={!connected}
-                            className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all ${
-                              !isHigh
-                                ? "bg-neutral-600 text-white"
-                                : "bg-[var(--cf-card-bg)] border border-[var(--cf-border)] text-[var(--cf-text-muted)] hover:text-white"
-                            } disabled:opacity-40`}
+                            className="!text-[11px] !py-0.5 !px-2"
                           >
                             LOW
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     );
@@ -2295,7 +2375,9 @@ export function Dashboard({
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-[var(--cf-text-muted)]">Direct Write:</span>
                     <span className="text-[var(--cf-text-faint)]">Pin #</span>
-                    <input
+                    <Input
+                      size="sm"
+                      aria-label="Pin number"
                       type="number"
                       min="0"
                       max="48"
@@ -2304,7 +2386,7 @@ export function Dashboard({
                         setCustomPin(e.target.value);
                         syncSubStateToUrl("pin", e.target.value);
                       }}
-                      className="input w-16 text-xs font-mono text-center"
+                      className="w-16 font-mono text-center"
                     />
                     <select
                       value={customLevel}
@@ -2317,10 +2399,10 @@ export function Dashboard({
                   </div>
 
                   <Button
+                    variant="primary"
+                    size="sm"
                     onClick={() => handleSetGpio(Number(customPin), customLevel === "1")}
                     disabled={!connected}
-                    size="sm"
-                    className="cf-btn-orange text-xs"
                   >
                     Execute Pin Write
                   </Button>
@@ -2342,15 +2424,13 @@ export function Dashboard({
                   <span>Available 2.4 GHz Access Points</span>
                 </div>
                 <Button
+                  variant="primary"
+                  size="sm"
                   onClick={handleScanWifi}
                   disabled={!connected || scanning}
-                  size="sm"
-                  className="cf-btn-orange text-xs"
+                  loading={scanning}
+                  icon={ArrowClockwise}
                 >
-                  <ArrowClockwise
-                    size={13}
-                    className={scanning ? "animate-spin mr-1" : "mr-1"}
-                  />
                   {scanning ? "Scanning..." : "Scan"}
                 </Button>
               </div>
@@ -2413,15 +2493,16 @@ export function Dashboard({
                   <label className="block text-xs font-semibold text-[var(--cf-text-muted)] mb-1">
                     Network SSID
                   </label>
-                  <input
-                    type="text"
+                  <Input
+                    size="sm"
+                    aria-label="Network SSID"
                     value={joinSsid}
                     onChange={(e) => {
                       setJoinSsid(e.target.value);
                       syncSubStateToUrl("ssid", e.target.value);
                     }}
                     placeholder="Enter or select network SSID..."
-                    className="input w-full text-xs"
+                    className="w-full"
                   />
                 </div>
 
@@ -2430,12 +2511,14 @@ export function Dashboard({
                     Password (PSK)
                   </label>
                   <div className="relative">
-                    <input
+                    <Input
+                      size="sm"
+                      aria-label="Wi-Fi Password"
                       type={showPass ? "text" : "password"}
                       value={joinPass}
                       onChange={(e) => setJoinPass(e.target.value)}
                       placeholder="Enter Wi-Fi password..."
-                      className="input w-full text-xs pr-9"
+                      className="w-full pr-9 font-mono"
                     />
                     <button
                       type="button"
@@ -2448,11 +2531,14 @@ export function Dashboard({
                 </div>
 
                 <Button
+                  variant="primary"
+                  size="sm"
                   onClick={handleJoinWifi}
                   disabled={!connected || !joinSsid || joining}
-                  className="cf-btn-orange w-full text-xs"
+                  loading={joining}
+                  icon={PaperPlaneRight}
+                  className="w-full"
                 >
-                  <PaperPlaneRight size={13} className="mr-1.5" />
                   {joining ? "Provisioning ESP32..." : "Join Wi-Fi Network"}
                 </Button>
               </div>
@@ -2479,48 +2565,53 @@ export function Dashboard({
                     No Wi-Fi profiles stored yet.
                   </div>
                 ) : (
-                  <table className="table table-dense cf-table text-xs">
-                    <thead>
-                      <tr>
-                        <th>SSID</th>
-                        <th>Use Count</th>
-                        <th>Added</th>
-                        <th className="text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                  <Table>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.Head>SSID</Table.Head>
+                        <Table.Head>Use Count</Table.Head>
+                        <Table.Head>Added</Table.Head>
+                        <Table.Head className="text-right">Action</Table.Head>
+                      </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
                       {profiles.map((p) => (
-                        <tr key={p.id}>
-                          <td className="font-semibold text-[var(--cf-text-strong)]">{p.ssid}</td>
-                          <td className="font-mono">{p.useCount} times</td>
-                          <td className="text-[var(--cf-text-faint)]">
+                        <Table.Row key={p.id}>
+                          <Table.Cell className="font-semibold text-[var(--cf-text-strong)]">{p.ssid}</Table.Cell>
+                          <Table.Cell className="font-mono">{p.useCount} times</Table.Cell>
+                          <Table.Cell className="text-[var(--cf-text-faint)]">
                             {new Date(p.createdAt).toLocaleDateString()}
-                          </td>
-                          <td className="text-right flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => {
-                                setJoinSsid(p.ssid);
-                                syncSubStateToUrl("ssid", p.ssid);
-                                navigateTab("wifi");
-                              }}
-                              className="px-2 py-0.5 rounded text-[11px] bg-[var(--cf-inset)] border border-[var(--cf-border)] text-sky-400 font-semibold"
-                            >
-                              Provision
-                            </button>
-                            <button
-                              onClick={async () => {
-                                await deleteWifiProfile(p.id);
-                                setProfiles((prev) => prev.filter((x) => x.id !== p.id));
-                              }}
-                              className="p-1 rounded text-red-400 hover:bg-red-500/10"
-                            >
-                              <Trash size={13} />
-                            </button>
-                          </td>
-                        </tr>
+                          </Table.Cell>
+                          <Table.Cell className="text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => {
+                                  setJoinSsid(p.ssid);
+                                  syncSubStateToUrl("ssid", p.ssid);
+                                  navigateTab("wifi");
+                                }}
+                                className="!text-[11px] !py-0.5 !px-2 text-sky-400"
+                              >
+                                Provision
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={async () => {
+                                  await deleteWifiProfile(p.id);
+                                  setProfiles((prev) => prev.filter((x) => x.id !== p.id));
+                                }}
+                                icon={Trash}
+                                className="!p-1 text-red-400 hover:text-red-300"
+                              />
+                            </div>
+                          </Table.Cell>
+                        </Table.Row>
                       ))}
-                    </tbody>
-                  </table>
+                    </Table.Body>
+                  </Table>
                 )}
               </div>
             </div>
@@ -2529,21 +2620,26 @@ export function Dashboard({
               <span className="text-xs font-semibold text-[var(--cf-text-strong)] shrink-0">
                 Add Profile to D1:
               </span>
-              <input
-                type="text"
+              <Input
+                size="sm"
+                aria-label="Network SSID"
                 value={newSsid}
                 onChange={(e) => setNewSsid(e.target.value)}
                 placeholder="Network SSID..."
-                className="input text-xs flex-1 min-w-[120px]"
+                className="flex-1 min-w-[120px]"
               />
-              <input
+              <Input
+                size="sm"
+                aria-label="Network Password"
                 type="password"
                 value={newPass}
                 onChange={(e) => setNewPass(e.target.value)}
                 placeholder="Password..."
-                className="input text-xs flex-1 min-w-[120px]"
+                className="flex-1 min-w-[120px]"
               />
               <Button
+                variant="primary"
+                size="sm"
                 onClick={async () => {
                   if (!newSsid) return;
                   await saveWifiProfile({ ssid: newSsid, password: newPass });
@@ -2553,10 +2649,9 @@ export function Dashboard({
                   setNewPass("");
                 }}
                 disabled={!newSsid}
-                size="sm"
-                className="cf-btn-orange text-xs"
+                icon={Plus}
               >
-                <Plus size={13} className="mr-1" /> Save
+                Save
               </Button>
             </div>
           </div>
@@ -2569,7 +2664,7 @@ export function Dashboard({
           <div className="cf-card">
             <div className="cf-card-header !py-3">
               <div className="cf-card-title text-sm">
-                <Database size={15} className="text-[var(--cf-orange)]" />
+                <Database size={15} className="text-[var(--cf-blue)]" />
                 <span>Registered ESP32 Microcontrollers</span>
               </div>
             </div>
@@ -2580,44 +2675,45 @@ export function Dashboard({
                   No devices recorded yet. Connect over Bluetooth to register automatically.
                 </div>
               ) : (
-                <table className="table table-dense cf-table text-xs">
-                  <thead>
-                    <tr>
-                      <th>Device</th>
-                      <th>MAC Address</th>
-                      <th>Architecture</th>
-                      <th>Last Seen</th>
-                      <th className="text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.Head>Device</Table.Head>
+                      <Table.Head>MAC Address</Table.Head>
+                      <Table.Head>Architecture</Table.Head>
+                      <Table.Head>Last Seen</Table.Head>
+                      <Table.Head className="text-right">Action</Table.Head>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
                     {devices.map((d) => (
-                      <tr key={d.id}>
-                        <td className="font-semibold text-[var(--cf-text-strong)]">{d.name}</td>
-                        <td className="font-mono text-sky-400">{d.mac}</td>
-                        <td>
+                      <Table.Row key={d.id}>
+                        <Table.Cell className="font-semibold text-[var(--cf-text-strong)]">{d.name}</Table.Cell>
+                        <Table.Cell className="font-mono text-sky-400">{d.mac}</Table.Cell>
+                        <Table.Cell>
                           <Badge variant="neutral" className="text-[10px]">
                             {d.chip || "esp32s3"}
                           </Badge>
-                        </td>
-                        <td className="text-[var(--cf-text-faint)]">
+                        </Table.Cell>
+                        <Table.Cell className="text-[var(--cf-text-faint)]">
                           {d.lastSeenAt ? new Date(d.lastSeenAt).toLocaleString() : "—"}
-                        </td>
-                        <td className="text-right">
-                          <button
+                        </Table.Cell>
+                        <Table.Cell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={async () => {
                               await deleteDevice(d.id);
                               setDevices((prev) => prev.filter((x) => x.id !== d.id));
                             }}
-                            className="p-1 rounded text-red-400 hover:bg-red-500/10"
-                          >
-                            <Trash size={13} />
-                          </button>
-                        </td>
-                      </tr>
+                            icon={Trash}
+                            className="!p-1 text-red-400 hover:text-red-300"
+                          />
+                        </Table.Cell>
+                      </Table.Row>
                     ))}
-                  </tbody>
-                </table>
+                  </Table.Body>
+                </Table>
               )}
             </div>
           </div>
@@ -2630,29 +2726,30 @@ export function Dashboard({
           <div className="cf-card">
             <div className="cf-card-header !py-3 flex-wrap gap-2">
               <div className="cf-card-title text-sm">
-                <ClockCounterClockwise size={15} className="text-[var(--cf-orange)]" />
+                <ClockCounterClockwise size={15} className="text-[var(--cf-blue)]" />
                 <span>Command Audit History</span>
               </div>
 
               <div className="flex items-center gap-2">
-                <input
-                  type="text"
+                <Input
+                  size="sm"
+                  aria-label="Search audit trail"
                   value={historySearch}
                   onChange={(e) => setHistorySearch(e.target.value)}
                   placeholder="Search audit trail..."
-                  className="input text-xs w-36"
+                  className="w-36 sm:w-48"
                 />
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={async () => {
                     await clearHistory();
                     setHistory([]);
                   }}
                   disabled={history.length === 0}
-                  className="p-1 text-xs text-[var(--cf-text-muted)] hover:text-red-400"
+                  icon={Trash}
                   title="Clear history"
-                >
-                  <Trash size={14} />
-                </button>
+                />
               </div>
             </div>
 
@@ -2662,34 +2759,34 @@ export function Dashboard({
                   No audit logs found.
                 </div>
               ) : (
-                <table className="table table-dense cf-table text-xs">
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Command</th>
-                      <th>Response</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.Head>Time</Table.Head>
+                      <Table.Head>Command</Table.Head>
+                      <Table.Head>Response</Table.Head>
+                      <Table.Head>Status</Table.Head>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
                     {filteredHistory.map((h) => (
-                      <tr key={h.id}>
-                        <td className="font-mono text-[var(--cf-text-faint)] whitespace-nowrap">
+                      <Table.Row key={h.id}>
+                        <Table.Cell className="font-mono text-[var(--cf-text-faint)] whitespace-nowrap">
                           {new Date(h.createdAt).toLocaleTimeString()}
-                        </td>
-                        <td className="font-mono font-semibold">{h.command}</td>
-                        <td className="font-mono text-[var(--cf-text-muted)] truncate max-w-xs">
+                        </Table.Cell>
+                        <Table.Cell className="font-mono font-semibold">{h.command}</Table.Cell>
+                        <Table.Cell className="font-mono text-[var(--cf-text-muted)] truncate max-w-xs">
                           {h.response || "—"}
-                        </td>
-                        <td>
+                        </Table.Cell>
+                        <Table.Cell>
                           <Badge variant={h.ok ? "success" : "red"} className="text-[10px]">
                             {h.ok ? "OK" : "ERR"}
                           </Badge>
-                        </td>
-                      </tr>
+                        </Table.Cell>
+                      </Table.Row>
                     ))}
-                  </tbody>
-                </table>
+                  </Table.Body>
+                </Table>
               )}
             </div>
           </div>
@@ -2703,7 +2800,7 @@ export function Dashboard({
             <div className="cf-card">
               <div className="cf-card-header !py-3">
                 <div className="cf-card-title text-sm">
-                  <Gear size={15} className="text-[var(--cf-orange)]" />
+                  <Gear size={15} className="text-[var(--cf-blue)]" />
                   <span>Display &amp; Application State</span>
                 </div>
               </div>
@@ -2713,32 +2810,13 @@ export function Dashboard({
                   <label className="block text-xs font-bold text-[var(--cf-text-strong)] mb-2">
                     Color Theme Mode
                   </label>
-                  <div className="navigation cf-segmented-nav flex">
-                    <button
-                      type="button"
-                      onClick={() => toggleTheme("light")}
-                      data-selected={theme === "light" ? true : undefined}
-                      className={`navigation-pill cf-segmented-btn ${theme === "light" ? "active" : ""}`}
-                    >
-                      <Sun size={13} className="text-amber-500" /> <span>Light</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => toggleTheme("dark")}
-                      data-selected={theme === "dark" ? true : undefined}
-                      className={`navigation-pill cf-segmented-btn ${theme === "dark" ? "active" : ""}`}
-                    >
-                      <Moon size={13} className="text-sky-400" /> <span>Dark</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => toggleTheme("system")}
-                      data-selected={theme === "system" ? true : undefined}
-                      className={`navigation-pill cf-segmented-btn ${theme === "system" ? "active" : ""}`}
-                    >
-                      <Desktop size={13} /> <span>System ({resolvedTheme})</span>
-                    </button>
-                  </div>
+                  <Tabs
+                    variant="segmented"
+                    size="sm"
+                    value={theme}
+                    onValueChange={(val) => toggleTheme(val as "light" | "dark" | "system")}
+                    tabs={themeTabs}
+                  />
                 </div>
 
                 <div className="pt-3 border-t border-[var(--cf-border)]">
@@ -2756,12 +2834,14 @@ export function Dashboard({
                     </div>
 
                     {canInstall && !isStandalone && (
-                      <button
+                      <Button
+                        variant="primary"
+                        size="sm"
                         onClick={handleInstallPwa}
-                        className="px-3 py-1 rounded text-xs font-semibold bg-[var(--cf-orange)] text-white shadow-xs"
+                        icon={DownloadSimple}
                       >
                         Install PWA
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -2782,7 +2862,9 @@ export function Dashboard({
                   <div className="text-xs text-[var(--cf-text-muted)]">
                     Purge all device lists and Wi-Fi profiles from your isolated D1 partition.
                   </div>
-                  <button
+                  <Button
+                    variant="destructive"
+                    size="sm"
                     onClick={async () => {
                       if (confirm("Reset all stored devices, Wi-Fi profiles and history?")) {
                         await resetWorkspace();
@@ -2791,10 +2873,9 @@ export function Dashboard({
                         setHistory([]);
                       }
                     }}
-                    className="px-3 py-1 rounded text-xs font-semibold bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30"
                   >
                     Reset Workspace
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -2845,7 +2926,7 @@ export function Dashboard({
           <div className="relative">
             <Terminal size={18} weight={activeTab === "console" ? "fill" : "regular"} />
             {logs.length > 0 && (
-              <span className="absolute -top-1 -right-2 w-2 h-2 rounded-full bg-[var(--cf-orange)]" />
+              <span className="absolute -top-1 -right-2 w-2 h-2 rounded-full bg-[var(--cf-blue)]" />
             )}
           </div>
           <span>Logs</span>
@@ -2858,7 +2939,7 @@ export function Dashboard({
       <footer className="hidden md:block mt-auto border-t border-[var(--cf-border)] bg-[var(--cf-nav-bg)] py-3 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-[var(--cf-text-faint)]">
           <div className="flex items-center gap-2">
-            <Cpu size={14} className="text-[var(--cf-orange)]" />
+            <Cpu size={14} className="text-[var(--cf-blue)]" />
             <span>ESP32-S3 Remote Console · Vinext RSC · Cloudflare Workers Edge</span>
           </div>
           <div className="flex items-center gap-4">
