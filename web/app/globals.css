@@ -1,102 +1,42 @@
 @import "tailwindcss";
+@import "./sds/theme.css";
+@import "./sds/sds.css";
 @import "@cloudflare/kumo/styles/standalone";
 
 /* ==========================================================================
-   Cloudflare Dashboard Native Design System & Tokens
-   Dual-Theme (Light & Dark) Support with System Preference Sync
+   Cloudflare Dashboard Native Design System with Figma SDS Integration
    ========================================================================== */
 
-/* --------------------------------------------------------------------------
-   Light Mode Theme Tokens (Default Kumo)
-   -------------------------------------------------------------------------- */
-:root,
-[data-theme="light"],
-[data-mode="light"] {
+:root {
   /* Cloudflare Brand Colors */
-  --cf-orange: #f6821f;
-  --cf-orange-hover: #ea7314;
-  --cf-orange-active: #d9650b;
-  --cf-orange-glow: rgba(246, 130, 31, 0.16);
-  --cf-orange-subtle: rgba(246, 130, 31, 0.08);
-  --cf-orange-border: rgba(246, 130, 31, 0.28);
-
-  /* Kumo Surfaces (Light) */
-  --cf-bg: #fafafa;
-  --cf-nav-bg: #ffffff;
-  --cf-subnav-bg: #ffffff;
-  --cf-card-bg: #ffffff;
-  --cf-card-elev: #f4f4f6;
-  --cf-inset: #f0f0f3;
-  --cf-input-bg: #ffffff;
-
-  /* Kumo Borders (Light) */
-  --cf-border: #e4e4e7;
-  --cf-border-strong: #d4d4d8;
-  --cf-border-subtle: #f0f0f3;
-
-  /* Kumo Typography (Light) */
-  --cf-text-strong: #09090b;
-  --cf-text: #18181b;
-  --cf-text-muted: #71717a;
-  --cf-text-faint: #a1a1aa;
-
-  /* Status Tokens */
-  --cf-success: #10b981;
-  --cf-success-bg: rgba(16, 185, 129, 0.1);
-  --cf-warning: #f59e0b;
-  --cf-warning-bg: rgba(245, 158, 11, 0.1);
-  --cf-danger: #ef4444;
-  --cf-danger-bg: rgba(239, 68, 68, 0.1);
-  --cf-info: #3b82f6;
-  --cf-info-bg: rgba(59, 130, 246, 0.1);
-
-  /* Terminal Surface */
-  --cf-term-bg: #09090b;
-  --cf-term-header: #121215;
-  --cf-term-border: #27272a;
-
-  /* Common Properties */
-  --radius-cf: 8px;
-  --radius-sm: 6px;
-  --radius-pill: 9999px;
-  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
-
-/* --------------------------------------------------------------------------
-   Dark Mode Theme Tokens (Default Kumo - Deep Jet Black, High Contrast)
-   -------------------------------------------------------------------------- */
-[data-theme="dark"],
-[data-mode="dark"] {
-  /* Cloudflare Brand Colors */
-  --cf-orange: #f6821f;
-  --cf-orange-hover: #ea7314;
+  --cf-orange: var(--sds-color-background-brand-default, #f6821f);
+  --cf-orange-hover: var(--sds-color-background-brand-hover, #ea7314);
   --cf-orange-active: #d9650b;
   --cf-orange-glow: rgba(246, 130, 31, 0.25);
-  --cf-orange-subtle: rgba(246, 130, 31, 0.12);
+  --cf-orange-subtle: var(--sds-color-background-brand-tertiary, rgba(246, 130, 31, 0.12));
   --cf-orange-border: rgba(246, 130, 31, 0.38);
 
-  /* Kumo Surfaces (Dark - deep black, strictly neutral) */
-  --cf-bg: #080808;
-  --cf-nav-bg: #0e0e10;
-  --cf-subnav-bg: #0e0e10;
-  --cf-card-bg: #121214;
-  --cf-card-elev: #17171a;
-  --cf-inset: #1a1a1d;
-  --cf-input-bg: #141416;
+  /* Surfaces mapped to SDS */
+  --cf-bg: var(--sds-color-background-default-secondary, #080808);
+  --cf-nav-bg: var(--sds-color-background-default-default, #121214);
+  --cf-subnav-bg: var(--sds-color-background-default-default, #121214);
+  --cf-card-bg: var(--sds-color-background-default-default, #121214);
+  --cf-card-elev: var(--sds-color-background-default-default-hover, #17171a);
+  --cf-inset: var(--sds-color-background-default-tertiary, #1a1a1d);
+  --cf-input-bg: var(--sds-color-background-default-default, #121214);
 
-  /* Kumo Borders (Dark - pure neutral greys) */
-  --cf-border: #262629;
-  --cf-border-strong: #36363a;
-  --cf-border-subtle: #1c1c1f;
+  /* Borders mapped to SDS */
+  --cf-border: var(--sds-color-border-default-default, #262629);
+  --cf-border-strong: var(--sds-color-border-default-secondary, #36363a);
+  --cf-border-subtle: var(--sds-color-border-default-tertiary, #1c1c1f);
 
-  /* Kumo Typography (Dark - pure high contrast) */
-  --cf-text-strong: #fafafa;
-  --cf-text: #e4e4e7;
-  --cf-text-muted: #8e8e93;
-  --cf-text-faint: #5a5a60;
+  /* Typography mapped to SDS */
+  --cf-text-strong: var(--sds-color-text-default-default, #fafafa);
+  --cf-text: var(--sds-color-text-default-default, #e4e4e7);
+  --cf-text-muted: var(--sds-color-text-default-secondary, #8e8e93);
+  --cf-text-faint: var(--sds-color-text-default-tertiary, #5a5a60);
 
-  /* Status Tokens */
+  /* Status Colors */
   --cf-success: #10b981;
   --cf-success-bg: rgba(16, 185, 129, 0.14);
   --cf-warning: #f59e0b;
@@ -110,41 +50,13 @@
   --cf-term-bg: #040405;
   --cf-term-header: #0a0a0c;
   --cf-term-border: #222225;
-}
 
-/* Automatic System Adaptation when no manual override */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]):not([data-theme="dark"]):not([data-mode="light"]):not([data-mode="dark"]) {
-    --cf-bg: #080808;
-    --cf-nav-bg: #0e0e10;
-    --cf-subnav-bg: #0e0e10;
-    --cf-card-bg: #121214;
-    --cf-card-elev: #17171a;
-    --cf-inset: #1a1a1d;
-    --cf-input-bg: #141416;
-
-    --cf-border: #262629;
-    --cf-border-strong: #36363a;
-    --cf-border-subtle: #1c1c1f;
-
-    --cf-text-strong: #fafafa;
-    --cf-text: #e4e4e7;
-    --cf-text-muted: #8e8e93;
-    --cf-text-faint: #5a5a60;
-
-    --cf-success: #10b981;
-    --cf-success-bg: rgba(16, 185, 129, 0.14);
-    --cf-warning: #f59e0b;
-    --cf-warning-bg: rgba(245, 158, 11, 0.14);
-    --cf-danger: #ef4444;
-    --cf-danger-bg: rgba(239, 68, 68, 0.14);
-    --cf-info: #3b82f6;
-    --cf-info-bg: rgba(59, 130, 246, 0.14);
-
-    --cf-term-bg: #040405;
-    --cf-term-header: #0a0a0c;
-    --cf-term-border: #222225;
-  }
+  /* Standard Geometry */
+  --radius-cf: var(--sds-size-radius-200, 8px);
+  --radius-sm: var(--sds-size-radius-100, 4px);
+  --radius-pill: var(--sds-size-radius-full, 9999px);
+  --mono: var(--sds-typography-family-mono, ui-monospace, "SF Mono", monospace);
+  --sans: var(--sds-typography-family-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
 }
 
 :root {
@@ -173,7 +85,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Progress Bar (Modern Web Guidance Compliant)
+   Progress Bar
    -------------------------------------------------------------------------- */
 progress.cf-progress {
   appearance: none;
@@ -181,42 +93,24 @@ progress.cf-progress {
   overflow: clip;
   height: 8px;
   width: 100%;
-  --progress-bar-radius: 9999px;
-  border-radius: var(--progress-bar-radius);
+  border-radius: var(--radius-pill);
   background: var(--cf-inset);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
-progress.cf-progress::-webkit-progress-bar {
-  background: transparent;
-}
+progress.cf-progress::-webkit-progress-bar { background: transparent; }
 progress.cf-progress::-webkit-progress-value {
   background: var(--cf-orange);
-  border-radius: var(--progress-bar-radius);
+  border-radius: var(--radius-pill);
   transition: inline-size 0.3s ease;
 }
 progress.cf-progress::-moz-progress-bar {
   background: var(--cf-orange);
-  border-radius: var(--progress-bar-radius);
+  border-radius: var(--radius-pill);
   transition: inline-size 0.3s ease;
 }
-progress.cf-progress.purple::-webkit-progress-value {
-  background: #a855f7;
-}
-progress.cf-progress.purple::-moz-progress-bar {
-  background: #a855f7;
-}
-progress.cf-progress.emerald::-webkit-progress-value {
-  background: #10b981;
-}
-progress.cf-progress.emerald::-moz-progress-bar {
-  background: #10b981;
-}
-progress.cf-progress.sky::-webkit-progress-value {
-  background: #0284c7;
-}
-progress.cf-progress.sky::-moz-progress-bar {
-  background: #0284c7;
-}
+progress.cf-progress.purple::-webkit-progress-value { background: #a855f7; }
+progress.cf-progress.emerald::-webkit-progress-value { background: #10b981; }
+progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
 
 /* --------------------------------------------------------------------------
    Cloudflare Analytics SVG Chart
@@ -239,7 +133,7 @@ progress.cf-progress.sky::-moz-progress-bar {
 }
 
 /* --------------------------------------------------------------------------
-   1. Cloudflare Global Header (Top Navigation Bar)
+   Navigation & Top Bar
    -------------------------------------------------------------------------- */
 .cf-global-nav {
   height: 52px;
@@ -253,7 +147,6 @@ progress.cf-progress.sky::-moz-progress-bar {
   top: 0;
   z-index: 50;
   backdrop-filter: blur(8px);
-  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .cf-logo-wrapper {
@@ -273,55 +166,13 @@ progress.cf-progress.sky::-moz-progress-bar {
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--cf-text-strong);
-  transition: all 0.15s ease;
   cursor: pointer;
 }
 
-.cf-account-pill:hover {
-  background: var(--cf-border);
-  border-color: var(--cf-border-strong);
-}
-
-.cf-search-box {
-  display: none;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--cf-input-bg);
-  border: 1px solid var(--cf-border);
-  border-radius: var(--radius-sm);
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
-  color: var(--cf-text-muted);
-  width: 280px;
-  cursor: text;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-@media (min-width: 768px) {
-  .cf-search-box {
-    display: flex;
-  }
-}
-
-.cf-search-kbd {
-  margin-left: auto;
-  font-size: 0.7rem;
-  font-family: var(--mono);
-  background: var(--cf-inset);
-  border: 1px solid var(--cf-border);
-  border-radius: 4px;
-  padding: 0.1rem 0.35rem;
-  color: var(--cf-text-muted);
-}
-
-/* --------------------------------------------------------------------------
-   2. Cloudflare Zone / Worker Sub-Header
-   -------------------------------------------------------------------------- */
 .cf-sub-nav {
   background: var(--cf-subnav-bg);
   border-bottom: 1px solid var(--cf-border);
   padding: 1.25rem 1.25rem 0 1.25rem;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .cf-breadcrumbs {
@@ -333,16 +184,6 @@ progress.cf-progress.sky::-moz-progress-bar {
   margin-bottom: 0.75rem;
 }
 
-.cf-breadcrumb-link {
-  color: var(--cf-text-muted);
-  text-decoration: none;
-  transition: color 0.15s;
-}
-
-.cf-breadcrumb-link:hover {
-  color: var(--cf-text-strong);
-}
-
 .cf-project-header {
   display: flex;
   flex-direction: column;
@@ -351,18 +192,11 @@ progress.cf-progress.sky::-moz-progress-bar {
   gap: 1rem;
   padding-bottom: 1.25rem;
 }
-
 @media (min-width: 640px) {
   .cf-project-header {
     flex-direction: row;
     align-items: center;
   }
-}
-
-.cf-project-title-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
 }
 
 .cf-product-icon {
@@ -389,29 +223,14 @@ progress.cf-progress.sky::-moz-progress-bar {
   gap: 0.65rem;
 }
 
-.cf-domain-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.8rem;
-  color: var(--cf-text-muted);
-  text-decoration: none;
-  margin-top: 0.15rem;
-  transition: color 0.15s;
-}
-
-.cf-domain-link:hover {
-  color: var(--cf-orange);
-}
-
 /* --------------------------------------------------------------------------
-   3. Cloudflare Kumo Segmented Control Navigation & Tabs
+   SDS Segmented Control Navigation & Tabs
    -------------------------------------------------------------------------- */
 .cf-segmented-nav {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem;
+  gap: var(--sds-size-space-100, 0.25rem);
+  padding: var(--sds-size-space-100, 0.25rem);
   background: var(--cf-inset);
   border: 1px solid var(--cf-border);
   border-radius: var(--radius-cf);
@@ -420,9 +239,7 @@ progress.cf-progress.sky::-moz-progress-bar {
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
-.cf-segmented-nav::-webkit-scrollbar {
-  display: none;
-}
+.cf-segmented-nav::-webkit-scrollbar { display: none; }
 
 .cf-segmented-btn {
   display: inline-flex;
@@ -441,17 +258,10 @@ progress.cf-progress.sky::-moz-progress-bar {
   user-select: none;
   flex-shrink: 0;
 }
-
 .cf-segmented-btn:hover {
   color: var(--cf-text-strong);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--cf-card-elev);
 }
-
-[data-theme="light"] .cf-segmented-btn:hover,
-[data-mode="light"] .cf-segmented-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
 .cf-segmented-btn.active {
   color: var(--cf-text-strong);
   background: var(--cf-card-bg);
@@ -459,7 +269,6 @@ progress.cf-progress.sky::-moz-progress-bar {
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
 }
-
 .cf-segmented-count {
   font-size: 0.65rem;
   font-family: var(--mono);
@@ -469,83 +278,14 @@ progress.cf-progress.sky::-moz-progress-bar {
   border: 1px solid var(--cf-border-subtle);
   color: var(--cf-text-muted);
 }
-
 .cf-segmented-btn.active .cf-segmented-count {
   background: var(--cf-orange-subtle);
   border-color: var(--cf-orange-border);
   color: var(--cf-orange);
 }
 
-.cf-tabs-container {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  background: var(--cf-inset);
-  border: 1px solid var(--cf-border);
-  border-radius: var(--radius-cf);
-  overflow-x: auto;
-  max-width: 100%;
-  scrollbar-width: none;
-}
-
-.cf-tabs-container::-webkit-scrollbar {
-  display: none;
-}
-
-.cf-tab-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.65rem;
-  font-size: 0.775rem;
-  font-weight: 500;
-  color: var(--cf-text-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.12s ease;
-  flex-shrink: 0;
-}
-
-.cf-tab-button:hover {
-  color: var(--cf-text-strong);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-[data-theme="light"] .cf-tab-button:hover,
-[data-mode="light"] .cf-tab-button:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.cf-tab-button.active {
-  color: var(--cf-text-strong);
-  background: var(--cf-card-bg);
-  border-color: var(--cf-border);
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
-}
-
-.cf-tab-count {
-  font-size: 0.65rem;
-  font-family: var(--mono);
-  padding: 0.05rem 0.35rem;
-  border-radius: var(--radius-pill);
-  background: var(--cf-inset);
-  border: 1px solid var(--cf-border-subtle);
-  color: var(--cf-text-muted);
-}
-
-.cf-tab-button.active .cf-tab-count {
-  background: var(--cf-orange-subtle);
-  border-color: var(--cf-orange-border);
-  color: var(--cf-orange);
-}
-
 /* --------------------------------------------------------------------------
-   4. Cloudflare Analytics Metric Cards (Executive Tiles)
+   Metric Cards & Cloudflare Tiles
    -------------------------------------------------------------------------- */
 .cf-metrics-grid {
   display: grid;
@@ -553,17 +293,11 @@ progress.cf-progress.sky::-moz-progress-bar {
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
-
 @media (min-width: 640px) {
-  .cf-metrics-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  .cf-metrics-grid { grid-template-columns: repeat(3, 1fr); }
 }
-
 @media (min-width: 1024px) {
-  .cf-metrics-grid {
-    grid-template-columns: repeat(6, 1fr);
-  }
+  .cf-metrics-grid { grid-template-columns: repeat(6, 1fr); }
 }
 
 .cf-metric-card {
@@ -578,13 +312,7 @@ progress.cf-progress.sky::-moz-progress-bar {
   position: relative;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: border-color 0.15s, background-color 0.15s;
 }
-
-.cf-metric-card:hover {
-  border-color: var(--cf-border-strong);
-}
-
 .cf-metric-card::before {
   content: "";
   position: absolute;
@@ -593,12 +321,8 @@ progress.cf-progress.sky::-moz-progress-bar {
   right: 0;
   height: 2px;
   background: transparent;
-  transition: background 0.15s;
 }
-
-.cf-metric-card.highlight::before {
-  background: var(--cf-orange);
-}
+.cf-metric-card.highlight::before { background: var(--cf-orange); }
 
 .cf-metric-label {
   font-size: 0.75rem;
@@ -610,7 +334,6 @@ progress.cf-progress.sky::-moz-progress-bar {
   align-items: center;
   gap: 0.4rem;
 }
-
 .cf-metric-value {
   font-size: 1.15rem;
   font-weight: 700;
@@ -618,14 +341,13 @@ progress.cf-progress.sky::-moz-progress-bar {
   font-family: var(--mono);
   word-break: break-all;
 }
-
 .cf-metric-subtext {
   font-size: 0.725rem;
   color: var(--cf-text-muted);
 }
 
 /* --------------------------------------------------------------------------
-   5. Cloudflare Dashboard Cards & Panels
+   Cloudflare Dashboard Cards & Panels
    -------------------------------------------------------------------------- */
 .cf-card {
   background: var(--cf-card-bg);
@@ -634,9 +356,7 @@ progress.cf-progress.sky::-moz-progress-bar {
   overflow: hidden;
   margin-bottom: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: background-color 0.15s, border-color 0.15s;
 }
-
 .cf-card-header {
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--cf-border);
@@ -646,7 +366,6 @@ progress.cf-progress.sky::-moz-progress-bar {
   gap: 1rem;
   flex-wrap: wrap;
 }
-
 .cf-card-title {
   font-size: 0.95rem;
   font-weight: 600;
@@ -655,17 +374,12 @@ progress.cf-progress.sky::-moz-progress-bar {
   align-items: center;
   gap: 0.5rem;
 }
-
 .cf-card-desc {
   font-size: 0.8rem;
   color: var(--cf-text-muted);
   margin-top: 0.15rem;
 }
-
-.cf-card-body {
-  padding: 1.25rem;
-}
-
+.cf-card-body { padding: 1.25rem; }
 .cf-card-footer {
   padding: 0.75rem 1.25rem;
   background: var(--cf-inset);
@@ -678,25 +392,23 @@ progress.cf-progress.sky::-moz-progress-bar {
 }
 
 /* --------------------------------------------------------------------------
-   6. Cloudflare Buttons & Controls
+   SDS Button Adapters
    -------------------------------------------------------------------------- */
 .cf-btn-orange {
-  background: var(--cf-orange) !important;
-  color: #ffffff !important;
+  background: var(--sds-color-background-brand-default, #f6821f) !important;
+  color: var(--sds-color-text-brand-on-brand, #ffffff) !important;
   font-weight: 600 !important;
-  border: 1px solid transparent !important;
+  border: 1px solid var(--sds-color-border-brand-default, #f6821f) !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  border-radius: var(--radius-sm) !important;
   transition: all 0.15s ease !important;
 }
-
 .cf-btn-orange:hover:not(:disabled) {
-  background: var(--cf-orange-hover) !important;
+  background: var(--sds-color-background-brand-hover, #ea7314) !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(246, 130, 31, 0.3) !important;
 }
-
 .cf-btn-orange:active:not(:disabled) {
-  background: var(--cf-orange-active) !important;
   transform: translateY(0);
 }
 
@@ -714,20 +426,14 @@ progress.cf-progress.sky::-moz-progress-bar {
   gap: 0.35rem;
   transition: all 0.15s;
 }
-
 .cf-btn-ghost:hover:not(:disabled) {
   background: var(--cf-inset);
   border-color: var(--cf-border-strong);
   color: var(--cf-text-strong);
 }
 
-.cf-btn-ghost:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 /* --------------------------------------------------------------------------
-   7. Workers Tail / Real-Time Execution Console
+   Workers Tail Console
    -------------------------------------------------------------------------- */
 .cf-tail-terminal {
   background: var(--cf-term-bg);
@@ -740,7 +446,6 @@ progress.cf-progress.sky::-moz-progress-bar {
   overflow: hidden;
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
 }
-
 .cf-tail-header {
   height: 38px;
   background: var(--cf-term-header);
@@ -752,7 +457,6 @@ progress.cf-progress.sky::-moz-progress-bar {
   font-size: 0.75rem;
   color: var(--cf-text-muted);
 }
-
 .cf-tail-scroll {
   flex: 1;
   padding: 0.85rem;
@@ -762,7 +466,6 @@ progress.cf-progress.sky::-moz-progress-bar {
   gap: 0.35rem;
   font-size: 0.8rem;
 }
-
 .cf-log-row {
   display: flex;
   align-items: flex-start;
@@ -770,14 +473,12 @@ progress.cf-progress.sky::-moz-progress-bar {
   line-height: 1.45;
   padding: 0.15rem 0;
 }
-
 .cf-log-time {
   color: #64748b;
   font-size: 0.75rem;
   user-select: none;
   flex-shrink: 0;
 }
-
 .cf-tag {
   font-size: 0.7rem;
   font-weight: 700;
@@ -786,38 +487,14 @@ progress.cf-progress.sky::-moz-progress-bar {
   flex-shrink: 0;
   letter-spacing: 0.03em;
 }
-
-.cf-tag-tx {
-  background: rgba(56, 189, 248, 0.15);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.3);
-}
-
-.cf-tag-rx {
-  background: rgba(52, 211, 153, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.3);
-}
-
-.cf-tag-sys {
-  background: rgba(192, 132, 252, 0.15);
-  color: #c084fc;
-  border: 1px solid rgba(192, 132, 252, 0.3);
-}
-
-.cf-tag-err {
-  background: rgba(248, 113, 113, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(248, 113, 113, 0.3);
-}
-
-.cf-log-msg {
-  color: #e2e8f0;
-  word-break: break-all;
-}
+.cf-tag-tx { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+.cf-tag-rx { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+.cf-tag-sys { background: rgba(192, 132, 252, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3); }
+.cf-tag-err { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+.cf-log-msg { color: #e2e8f0; word-break: break-all; }
 
 /* --------------------------------------------------------------------------
-   8. Signal Strength Meter (4 Bars)
+   Signal Strength Meter
    -------------------------------------------------------------------------- */
 .signal-bars {
   display: inline-flex;
@@ -826,28 +503,19 @@ progress.cf-progress.sky::-moz-progress-bar {
   height: 14px;
   margin-right: 4px;
 }
-
 .signal-bar {
   width: 3px;
-  background: #cbd5e1;
+  background: var(--cf-border-strong);
   border-radius: 1px;
 }
-
-[data-theme="dark"] .signal-bar {
-  background: #2b3846;
-}
-
 .signal-bar.bar-1 { height: 4px; }
 .signal-bar.bar-2 { height: 7px; }
 .signal-bar.bar-3 { height: 10px; }
 .signal-bar.bar-4 { height: 14px; }
-
-.signal-bar.active {
-  background: var(--cf-orange);
-}
+.signal-bar.active { background: var(--cf-orange); }
 
 /* --------------------------------------------------------------------------
-   9. Cloudflare Data Tables
+   Data Tables
    -------------------------------------------------------------------------- */
 .cf-table-wrapper {
   overflow-x: auto;
@@ -855,14 +523,12 @@ progress.cf-progress.sky::-moz-progress-bar {
   border-radius: var(--radius-cf);
   background: var(--cf-card-bg);
 }
-
 .cf-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.825rem;
   text-align: left;
 }
-
 .cf-table th {
   background: var(--cf-inset);
   color: var(--cf-text-faint);
@@ -873,46 +539,28 @@ progress.cf-progress.sky::-moz-progress-bar {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--cf-border);
 }
-
 .cf-table td {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--cf-border-subtle);
   color: var(--cf-text);
 }
-
-.cf-table tr:hover td {
-  background: rgba(0, 0, 0, 0.02);
-}
-
-[data-theme="dark"] .cf-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.cf-table tr:last-child td {
-  border-bottom: none;
-}
+.cf-table tr:hover td { background: var(--cf-card-elev); }
+.cf-table tr:last-child td { border-bottom: none; }
 
 /* --------------------------------------------------------------------------
-   10. Interactive GPIO Grid & Switches
+   GPIO Grid & Controls
    -------------------------------------------------------------------------- */
 .cf-gpio-grid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
   gap: 0.875rem;
 }
-
 @media (min-width: 640px) {
-  .cf-gpio-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .cf-gpio-grid { grid-template-columns: repeat(2, 1fr); }
 }
-
 @media (min-width: 1024px) {
-  .cf-gpio-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+  .cf-gpio-grid { grid-template-columns: repeat(4, 1fr); }
 }
-
 .cf-gpio-card {
   background: var(--cf-inset);
   border: 1px solid var(--cf-border);
@@ -923,18 +571,14 @@ progress.cf-progress.sky::-moz-progress-bar {
   justify-content: space-between;
   transition: all 0.15s;
 }
-
-.cf-gpio-card:hover {
-  border-color: var(--cf-border-strong);
-}
-
+.cf-gpio-card:hover { border-color: var(--cf-border-strong); }
 .cf-gpio-card.active {
   border-color: var(--cf-orange);
   background: var(--cf-card-elev);
 }
 
 /* --------------------------------------------------------------------------
-   11. Native Mobile PWA & Bottom Navigation System
+   Mobile PWA & App Shell
    -------------------------------------------------------------------------- */
 .cf-app-shell {
   min-height: 100dvh;
@@ -943,13 +587,11 @@ progress.cf-progress.sky::-moz-progress-bar {
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-
 @media (max-width: 768px) {
   .cf-app-shell {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 64px);
   }
 }
-
 .cf-bottom-nav {
   position: fixed;
   bottom: 0;
@@ -966,7 +608,6 @@ progress.cf-progress.sky::-moz-progress-bar {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
-
 .cf-bottom-nav-item {
   display: flex;
   flex-direction: column;
@@ -983,21 +624,13 @@ progress.cf-progress.sky::-moz-progress-bar {
   -webkit-tap-highlight-color: transparent;
   gap: 2px;
 }
-
 .cf-bottom-nav-item.active {
   color: var(--cf-orange);
   font-weight: 600;
 }
+.cf-bottom-nav-item svg { transition: transform 0.15s ease; }
+.cf-bottom-nav-item.active svg { transform: translateY(-1px); }
 
-.cf-bottom-nav-item svg {
-  transition: transform 0.15s ease;
-}
-
-.cf-bottom-nav-item.active svg {
-  transform: translateY(-1px);
-}
-
-/* Mobile Quick Action Pill */
 .cf-quick-action-pill {
   display: inline-flex;
   align-items: center;
@@ -1012,9 +645,7 @@ progress.cf-progress.sky::-moz-progress-bar {
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.15s ease;
-  -webkit-tap-highlight-color: transparent;
 }
-
 .cf-quick-action-pill:hover,
 .cf-quick-action-pill:active {
   background: var(--cf-card-elev);
@@ -1022,7 +653,6 @@ progress.cf-progress.sky::-moz-progress-bar {
   color: var(--cf-orange);
 }
 
-/* Compact Metrics on Mobile */
 @media (max-width: 640px) {
   .cf-metrics-grid {
     grid-template-columns: repeat(3, 1fr) !important;
@@ -1045,8 +675,6 @@ progress.cf-progress.sky::-moz-progress-bar {
     display: none !important;
   }
 }
-
-/* Mobile Terminal Optimization */
 @media (max-width: 768px) {
   .cf-tail-terminal {
     height: calc(100dvh - 310px);

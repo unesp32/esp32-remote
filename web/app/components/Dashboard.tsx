@@ -1088,12 +1088,13 @@ export function Dashboard({
           </div>
         </div>
 
-        {/* Cloudflare Kumo Segmented Control Navigation (10 Compact Tabs) */}
+        {/* Figma SDS & Cloudflare Kumo Segmented Control Navigation (10 Compact Tabs) */}
         <div className="pb-2.5 overflow-x-auto scrollbar-none -mx-2 px-2 sm:mx-0 sm:px-0">
-          <nav className="cf-segmented-nav flex" aria-label="Main Navigation">
+          <nav className="navigation cf-segmented-nav flex" aria-label="Main Navigation">
             <button
               onClick={() => navigateTab("overview")}
-              className={`cf-segmented-btn ${activeTab === "overview" ? "active" : ""}`}
+              data-selected={activeTab === "overview" ? true : undefined}
+              className={`navigation-pill cf-segmented-btn ${activeTab === "overview" ? "active" : ""}`}
               title="Overview · System health, BLE GATT status & quick actions"
             >
               <Broadcast size={13} />
@@ -1102,7 +1103,8 @@ export function Dashboard({
 
             <button
               onClick={() => navigateTab("tools")}
-              className={`cf-segmented-btn ${activeTab === "tools" ? "active" : ""}`}
+              data-selected={activeTab === "tools" ? true : undefined}
+              className={`navigation-pill cf-segmented-btn ${activeTab === "tools" ? "active" : ""}`}
               title="Network Tools · 1.1.1.1 DNS, BGP ASN WHOIS, cURL & Ping"
             >
               <Globe size={13} />
@@ -1111,7 +1113,8 @@ export function Dashboard({
 
             <button
               onClick={() => navigateTab("hardware")}
-              className={`cf-segmented-btn ${activeTab === "hardware" ? "active" : ""}`}
+              data-selected={activeTab === "hardware" ? true : undefined}
+              className={`navigation-pill cf-segmented-btn ${activeTab === "hardware" ? "active" : ""}`}
               title="Hardware · ESP32-S3 SRAM, PSRAM, Flash & RTC Clock"
             >
               <Cpu size={13} />
@@ -1120,7 +1123,8 @@ export function Dashboard({
 
             <button
               onClick={() => navigateTab("console")}
-              className={`cf-segmented-btn ${activeTab === "console" ? "active" : ""}`}
+              data-selected={activeTab === "console" ? true : undefined}
+              className={`navigation-pill cf-segmented-btn ${activeTab === "console" ? "active" : ""}`}
               title="Logs · Real-time Workers Tail GATT serial console"
             >
               <Terminal size={13} />
@@ -1130,7 +1134,8 @@ export function Dashboard({
 
             <button
               onClick={() => navigateTab("gpio")}
-              className={`cf-segmented-btn ${activeTab === "gpio" ? "active" : ""}`}
+              data-selected={activeTab === "gpio" ? true : undefined}
+              className={`navigation-pill cf-segmented-btn ${activeTab === "gpio" ? "active" : ""}`}
               title="GPIO · Output header pins & status LED 48"
             >
               <SlidersHorizontal size={13} />
@@ -1139,7 +1144,8 @@ export function Dashboard({
 
             <button
               onClick={() => navigateTab("wifi")}
-              className={`cf-segmented-btn ${activeTab === "wifi" ? "active" : ""}`}
+              data-selected={activeTab === "wifi" ? true : undefined}
+              className={`navigation-pill cf-segmented-btn ${activeTab === "wifi" ? "active" : ""}`}
               title="Wi-Fi · 2.4 GHz RF scanner & credential provisioning"
             >
               <WifiHigh size={13} />
@@ -1151,7 +1157,8 @@ export function Dashboard({
 
             <button
               onClick={() => navigateTab("profiles")}
-              className={`cf-segmented-btn ${activeTab === "profiles" ? "active" : ""}`}
+              data-selected={activeTab === "profiles" ? true : undefined}
+              className={`navigation-pill cf-segmented-btn ${activeTab === "profiles" ? "active" : ""}`}
               title="Profiles · Stored Wi-Fi networks in Cloudflare D1"
             >
               <HardDrives size={13} />
@@ -1163,7 +1170,8 @@ export function Dashboard({
 
             <button
               onClick={() => navigateTab("devices")}
-              className={`cf-segmented-btn ${activeTab === "devices" ? "active" : ""}`}
+              data-selected={activeTab === "devices" ? true : undefined}
+              className={`navigation-pill cf-segmented-btn ${activeTab === "devices" ? "active" : ""}`}
               title="Devices · Registered ESP32 inventory & MAC addresses"
             >
               <Database size={13} />
@@ -1175,7 +1183,8 @@ export function Dashboard({
 
             <button
               onClick={() => navigateTab("history")}
-              className={`cf-segmented-btn ${activeTab === "history" ? "active" : ""}`}
+              data-selected={activeTab === "history" ? true : undefined}
+              className={`navigation-pill cf-segmented-btn ${activeTab === "history" ? "active" : ""}`}
               title="Audit · Cryptographic SQLite audit trail & event history"
             >
               <ClockCounterClockwise size={13} />
@@ -1187,7 +1196,8 @@ export function Dashboard({
 
             <button
               onClick={() => navigateTab("settings")}
-              className={`cf-segmented-btn ${activeTab === "settings" ? "active" : ""}`}
+              data-selected={activeTab === "settings" ? true : undefined}
+              className={`navigation-pill cf-segmented-btn ${activeTab === "settings" ? "active" : ""}`}
               title="Settings · Light/Dark theme, PWA installation & workspace config"
             >
               <Gear size={13} />
@@ -1470,7 +1480,7 @@ export function Dashboard({
                 </div>
               </div>
               <div className="cf-card-body p-0 overflow-x-auto">
-                <table className="cf-table text-xs">
+                <table className="table table-dense cf-table text-xs">
                   <tbody>
                     <tr>
                       <td className="font-semibold text-[var(--cf-text-muted)] w-1/3">
@@ -1516,10 +1526,11 @@ export function Dashboard({
           <div className="space-y-3">
             {/* Tool Category Selector Segmented Bar */}
             <div className="overflow-x-auto scrollbar-none">
-              <nav className="cf-segmented-nav flex" aria-label="Network Tools Navigation">
+              <nav className="navigation cf-segmented-nav flex" aria-label="Network Tools Navigation">
                 <button
                   onClick={() => setToolSubTab("dns")}
-                  className={`cf-segmented-btn ${toolSubTab === "dns" ? "active" : ""}`}
+                  data-selected={toolSubTab === "dns" ? true : undefined}
+                  className={`navigation-pill cf-segmented-btn ${toolSubTab === "dns" ? "active" : ""}`}
                   title="1.1.1.1 DNS over HTTPS lookup & record inspection"
                 >
                   <Globe size={13} />
@@ -1528,7 +1539,8 @@ export function Dashboard({
 
                 <button
                   onClick={() => setToolSubTab("ip")}
-                  className={`cf-segmented-btn ${toolSubTab === "ip" ? "active" : ""}`}
+                  data-selected={toolSubTab === "ip" ? true : undefined}
+                  className={`navigation-pill cf-segmented-btn ${toolSubTab === "ip" ? "active" : ""}`}
                   title="Hurricane Electric (he.net) BGP ASN & GeoIP WHOIS"
                 >
                   <ShieldCheck size={13} />
@@ -1537,7 +1549,8 @@ export function Dashboard({
 
                 <button
                   onClick={() => setToolSubTab("http")}
-                  className={`cf-segmented-btn ${toolSubTab === "http" ? "active" : ""}`}
+                  data-selected={toolSubTab === "http" ? true : undefined}
+                  className={`navigation-pill cf-segmented-btn ${toolSubTab === "http" ? "active" : ""}`}
                   title="HTTP & cURL Edge Prober"
                 >
                   <FileText size={13} />
@@ -1546,7 +1559,8 @@ export function Dashboard({
 
                 <button
                   onClick={() => setToolSubTab("ping")}
-                  className={`cf-segmented-btn ${toolSubTab === "ping" ? "active" : ""}`}
+                  data-selected={toolSubTab === "ping" ? true : undefined}
+                  className={`navigation-pill cf-segmented-btn ${toolSubTab === "ping" ? "active" : ""}`}
                   title="Round-Trip Ping & RTT Latency"
                 >
                   <Pulse size={13} />
@@ -1574,7 +1588,7 @@ export function Dashboard({
                     value={dnsDomain}
                     onChange={(e) => setDnsDomain(e.target.value)}
                     placeholder="Domain (e.g. virt.cc.cd)..."
-                    className="flex-1 min-w-[180px] bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2.5 py-1 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
+                    className="input flex-1 min-w-[180px] text-xs font-mono"
                   />
                   <select
                     value={dnsType}
@@ -1616,7 +1630,7 @@ export function Dashboard({
 
                     {dnsResult.answers.length > 0 ? (
                       <div className="overflow-x-auto">
-                        <table className="cf-table text-xs">
+                        <table className="table table-dense cf-table text-xs">
                           <thead>
                             <tr>
                               <th>Record</th>
@@ -1668,7 +1682,7 @@ export function Dashboard({
                     value={ipQuery}
                     onChange={(e) => setIpQuery(e.target.value)}
                     placeholder="IP or Hostname (e.g. 1.1.1.1)..."
-                    className="flex-1 min-w-[200px] bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2.5 py-1 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
+                    className="input flex-1 min-w-[200px] text-xs font-mono"
                   />
                   <Button
                     onClick={handleExecuteIpLookup}
@@ -1756,7 +1770,7 @@ export function Dashboard({
                     value={httpTargetUrl}
                     onChange={(e) => setHttpTargetUrl(e.target.value)}
                     placeholder="Target URL..."
-                    className="flex-1 min-w-[200px] bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2.5 py-1 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
+                    className="input flex-1 min-w-[200px] text-xs font-mono"
                   />
                   <Button
                     onClick={handleExecuteHttp}
@@ -1787,7 +1801,7 @@ export function Dashboard({
                         Headers:
                       </div>
                       <div className="max-h-32 overflow-y-auto border border-[var(--cf-border-subtle)] rounded">
-                        <table className="cf-table text-[11px]">
+                        <table className="table table-dense cf-table text-[11px]">
                           <tbody>
                             {Object.entries(httpResult.headers).map(([k, v]) => (
                               <tr key={k}>
@@ -1837,7 +1851,7 @@ export function Dashboard({
                     value={pingTarget}
                     onChange={(e) => setPingTarget(e.target.value)}
                     placeholder="Host to ping (e.g. 1.1.1.1)..."
-                    className="flex-1 min-w-[180px] bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2.5 py-1 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
+                    className="input flex-1 min-w-[180px] text-xs font-mono"
                   />
                   <Button
                     onClick={handleExecutePingTest}
@@ -1981,7 +1995,7 @@ export function Dashboard({
 
                 {/* Legend Table */}
                 <div className="overflow-x-auto">
-                  <table className="cf-table text-xs">
+                  <table className="table table-dense cf-table text-xs">
                     <thead>
                       <tr>
                         <th>Partition Name</th>
@@ -2034,7 +2048,7 @@ export function Dashboard({
               </div>
 
               <div className="cf-card-body p-0 overflow-x-auto">
-                <table className="cf-table text-xs">
+                <table className="table table-dense cf-table text-xs">
                   <thead>
                     <tr>
                       <th>Table Name</th>
@@ -2169,7 +2183,7 @@ export function Dashboard({
                     : "Connect Bluetooth to send command..."
                 }
                 disabled={!connected}
-                className="flex-1 bg-[var(--cf-card-bg)] border border-[var(--cf-border)] rounded px-3 py-1.5 text-xs font-mono text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
+                className="input flex-1 text-xs font-mono"
               />
               <Button
                 type="submit"
@@ -2290,7 +2304,7 @@ export function Dashboard({
                         setCustomPin(e.target.value);
                         syncSubStateToUrl("pin", e.target.value);
                       }}
-                      className="w-14 bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-1.5 py-1 text-xs font-mono text-center text-[var(--cf-text-strong)]"
+                      className="input w-16 text-xs font-mono text-center"
                     />
                     <select
                       value={customLevel}
@@ -2407,7 +2421,7 @@ export function Dashboard({
                       syncSubStateToUrl("ssid", e.target.value);
                     }}
                     placeholder="Enter or select network SSID..."
-                    className="w-full bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-3 py-2 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)]"
+                    className="input w-full text-xs"
                   />
                 </div>
 
@@ -2421,7 +2435,7 @@ export function Dashboard({
                       value={joinPass}
                       onChange={(e) => setJoinPass(e.target.value)}
                       placeholder="Enter Wi-Fi password..."
-                      className="w-full bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-3 py-2 text-xs text-[var(--cf-text-strong)] placeholder-[var(--cf-text-faint)] focus:outline-none focus:border-[var(--cf-orange)] pr-9"
+                      className="input w-full text-xs pr-9"
                     />
                     <button
                       type="button"
@@ -2465,7 +2479,7 @@ export function Dashboard({
                     No Wi-Fi profiles stored yet.
                   </div>
                 ) : (
-                  <table className="cf-table text-xs">
+                  <table className="table table-dense cf-table text-xs">
                     <thead>
                       <tr>
                         <th>SSID</th>
@@ -2520,14 +2534,14 @@ export function Dashboard({
                 value={newSsid}
                 onChange={(e) => setNewSsid(e.target.value)}
                 placeholder="Network SSID..."
-                className="bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2.5 py-1 text-xs text-[var(--cf-text-strong)] flex-1 min-w-[120px]"
+                className="input text-xs flex-1 min-w-[120px]"
               />
               <input
                 type="password"
                 value={newPass}
                 onChange={(e) => setNewPass(e.target.value)}
                 placeholder="Password..."
-                className="bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2.5 py-1 text-xs text-[var(--cf-text-strong)] flex-1 min-w-[120px]"
+                className="input text-xs flex-1 min-w-[120px]"
               />
               <Button
                 onClick={async () => {
@@ -2566,7 +2580,7 @@ export function Dashboard({
                   No devices recorded yet. Connect over Bluetooth to register automatically.
                 </div>
               ) : (
-                <table className="cf-table text-xs">
+                <table className="table table-dense cf-table text-xs">
                   <thead>
                     <tr>
                       <th>Device</th>
@@ -2626,7 +2640,7 @@ export function Dashboard({
                   value={historySearch}
                   onChange={(e) => setHistorySearch(e.target.value)}
                   placeholder="Search audit trail..."
-                  className="bg-[var(--cf-inset)] border border-[var(--cf-border)] rounded px-2 py-1 text-xs text-[var(--cf-text-strong)] w-36"
+                  className="input text-xs w-36"
                 />
                 <button
                   onClick={async () => {
@@ -2648,7 +2662,7 @@ export function Dashboard({
                   No audit logs found.
                 </div>
               ) : (
-                <table className="cf-table text-xs">
+                <table className="table table-dense cf-table text-xs">
                   <thead>
                     <tr>
                       <th>Time</th>
@@ -2699,25 +2713,28 @@ export function Dashboard({
                   <label className="block text-xs font-bold text-[var(--cf-text-strong)] mb-2">
                     Color Theme Mode
                   </label>
-                  <div className="cf-segmented-nav flex">
+                  <div className="navigation cf-segmented-nav flex">
                     <button
                       type="button"
                       onClick={() => toggleTheme("light")}
-                      className={`cf-segmented-btn ${theme === "light" ? "active" : ""}`}
+                      data-selected={theme === "light" ? true : undefined}
+                      className={`navigation-pill cf-segmented-btn ${theme === "light" ? "active" : ""}`}
                     >
                       <Sun size={13} className="text-amber-500" /> <span>Light</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => toggleTheme("dark")}
-                      className={`cf-segmented-btn ${theme === "dark" ? "active" : ""}`}
+                      data-selected={theme === "dark" ? true : undefined}
+                      className={`navigation-pill cf-segmented-btn ${theme === "dark" ? "active" : ""}`}
                     >
                       <Moon size={13} className="text-sky-400" /> <span>Dark</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => toggleTheme("system")}
-                      className={`cf-segmented-btn ${theme === "system" ? "active" : ""}`}
+                      data-selected={theme === "system" ? true : undefined}
+                      className={`navigation-pill cf-segmented-btn ${theme === "system" ? "active" : ""}`}
                     >
                       <Desktop size={13} /> <span>System ({resolvedTheme})</span>
                     </button>
