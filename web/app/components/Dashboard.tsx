@@ -1155,147 +1155,151 @@ export function Dashboard({
           1. Cloudflare Global Header Navbar (Responsive)
           ==================================================================== */}
       <header className="cf-global-nav sticky top-0 z-40">
-        <div className="cf-logo-wrapper">
-          <div
-            onClick={() => navigateTab("overview")}
-            className="flex items-center gap-2.5 cursor-pointer select-none group"
-            title="ESP32 Remote · Direct Edge Web Bluetooth"
-          >
-            <div className="w-7 h-7 rounded-md bg-[var(--cf-card-elev)] border border-[var(--cf-border-strong)] flex items-center justify-center text-[var(--cf-blue)] shadow-xs group-hover:border-[var(--cf-blue)] transition-colors">
-              <Cpu size={16} weight="bold" />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-sm tracking-tight text-[var(--cf-text-strong)]">ESP32</span>
-              <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-[var(--cf-inset)] text-[var(--cf-text-muted)] border border-[var(--cf-border-subtle)] font-medium">
-                Remote
-              </span>
-            </div>
-          </div>
-
-          <span className="hidden sm:inline text-[var(--cf-border-strong)]">|</span>
-
-          <div className="hidden sm:flex cf-account-pill">
-            <span>unesp32</span>
-            <CaretDown size={12} className="text-[var(--cf-text-muted)]" />
-          </div>
-        </div>
-
-        {/* Global Search Bar (Desktop only) */}
-        <div className="cf-search-box hidden md:flex">
-          <MagnifyingGlass size={15} />
-          <span>Search tools, DNS, GPIO or IP...</span>
-          <span className="cf-search-kbd">⌘K</span>
-        </div>
-
-        {/* Header Actions */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* PWA Install Button */}
-          {canInstall && !isStandalone && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleInstallPwa}
-              icon={DownloadSimple}
-              title="Install ESP32 Remote as standalone PWA"
+        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
+          <div className="cf-logo-wrapper">
+            <div
+              onClick={() => navigateTab("overview")}
+              className="flex items-center gap-2.5 cursor-pointer select-none group"
+              title="ESP32 Remote · Direct Edge Web Bluetooth"
             >
-              <span className="hidden sm:inline">Install App</span>
+              <div className="w-7 h-7 rounded-md bg-[var(--cf-card-elev)] border border-[var(--cf-border-strong)] flex items-center justify-center text-[var(--cf-blue)] shadow-xs group-hover:border-[var(--cf-blue)] transition-colors">
+                <Cpu size={16} weight="bold" />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm tracking-tight text-[var(--cf-text-strong)]">ESP32</span>
+                <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-[var(--cf-inset)] text-[var(--cf-text-muted)] border border-[var(--cf-border-subtle)] font-medium">
+                  Remote
+                </span>
+              </div>
+            </div>
+
+            <span className="hidden sm:inline text-[var(--cf-border-strong)]">|</span>
+
+            <div className="hidden sm:flex cf-account-pill">
+              <span>unesp32</span>
+              <CaretDown size={12} className="text-[var(--cf-text-muted)]" />
+            </div>
+          </div>
+
+          {/* Global Search Bar (Desktop only) */}
+          <div className="cf-search-box hidden md:flex">
+            <MagnifyingGlass size={15} />
+            <span>Search tools, DNS, GPIO or IP...</span>
+            <span className="cf-search-kbd">⌘K</span>
+          </div>
+
+          {/* Header Actions */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* PWA Install Button */}
+            {canInstall && !isStandalone && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleInstallPwa}
+                icon={DownloadSimple}
+                title="Install ESP32 Remote as standalone PWA"
+              >
+                <span className="hidden sm:inline">Install App</span>
+              </Button>
+            )}
+
+            {/* Quick Connect / Status Pill */}
+            <Button
+              variant={connected ? "secondary" : "primary"}
+              size="sm"
+              onClick={handleConnect}
+              disabled={connecting || !bluetoothSupported}
+              icon={Bluetooth}
+              title={connected ? "Click to disconnect" : "Connect ESP32 via Bluetooth"}
+              className={
+                connected
+                  ? "!text-emerald-400 !border-emerald-500/30 !bg-emerald-500/10 hover:!bg-emerald-500/20"
+                  : connecting
+                    ? "!text-amber-400 !border-amber-500/30 !bg-amber-500/10"
+                    : ""
+              }
+            >
+              <span className="hidden xs:inline">
+                {connected ? "Connected" : connecting ? "Pairing..." : "Connect"}
+              </span>
             </Button>
-          )}
 
-          {/* Quick Connect / Status Pill */}
-          <Button
-            variant={connected ? "secondary" : "primary"}
-            size="sm"
-            onClick={handleConnect}
-            disabled={connecting || !bluetoothSupported}
-            icon={Bluetooth}
-            title={connected ? "Click to disconnect" : "Connect ESP32 via Bluetooth"}
-            className={
-              connected
-                ? "!text-emerald-400 !border-emerald-500/30 !bg-emerald-500/10 hover:!bg-emerald-500/20"
-                : connecting
-                  ? "!text-amber-400 !border-amber-500/30 !bg-amber-500/10"
-                  : ""
-            }
-          >
-            <span className="hidden xs:inline">
-              {connected ? "Connected" : connecting ? "Pairing..." : "Connect"}
-            </span>
-          </Button>
+            {/* Theme Switcher Toggle */}
+            <button
+              onClick={() => toggleTheme()}
+              className="p-1.5 hover:text-[var(--cf-text-strong)] hover:bg-[var(--cf-inset)] rounded transition-all text-[var(--cf-text-muted)] border border-[var(--cf-border)]"
+              title={`Theme: ${resolvedTheme} (click to toggle)`}
+              aria-label="Toggle theme"
+            >
+              {resolvedTheme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
 
-          {/* Theme Switcher Toggle */}
-          <button
-            onClick={() => toggleTheme()}
-            className="p-1.5 hover:text-[var(--cf-text-strong)] hover:bg-[var(--cf-inset)] rounded transition-all text-[var(--cf-text-muted)]"
-            title={`Theme: ${resolvedTheme} (click to toggle)`}
-            aria-label="Toggle theme"
-          >
-            {resolvedTheme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
-          </button>
-
-          <button
-            onClick={() => navigateTab("settings")}
-            className="p-1.5 hover:text-[var(--cf-text-strong)] hover:bg-[var(--cf-inset)] rounded transition-all text-[var(--cf-text-muted)]"
-            title="Application Settings"
-          >
-            <Gear size={17} />
-          </button>
+            <button
+              onClick={() => navigateTab("settings")}
+              className="p-1.5 hover:text-[var(--cf-text-strong)] hover:bg-[var(--cf-inset)] rounded transition-all text-[var(--cf-text-muted)] border border-[var(--cf-border)]"
+              title="Application Settings"
+            >
+              <Gear size={17} />
+            </button>
+          </div>
         </div>
       </header>
 
       {/* ====================================================================
           2. Cloudflare Project Sub-Nav & Tab Navigation
           ==================================================================== */}
-      <section className="cf-sub-nav pb-0">
-        <div className="flex items-center justify-between gap-2 pb-2">
-          <div className="cf-breadcrumbs !mb-0 text-xs">
-            <span className="text-[var(--cf-text-muted)] hidden sm:inline">Workers /</span>
-            <span className="text-[var(--cf-text-strong)] font-semibold">esp32-remote</span>
-            <span className="text-[var(--cf-text-faint)]">/</span>
-            <span className="text-[var(--cf-blue)] font-mono text-[11px] capitalize">
-              {activeTab}
-            </span>
+      <section className="cf-sub-nav">
+        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between gap-2 pb-2">
+            <div className="cf-breadcrumbs !mb-0 text-xs">
+              <span className="text-[var(--cf-text-muted)] hidden sm:inline">Workers /</span>
+              <span className="text-[var(--cf-text-strong)] font-semibold">esp32-remote</span>
+              <span className="text-[var(--cf-text-faint)]">/</span>
+              <span className="text-[var(--cf-blue)] font-mono text-[11px] capitalize">
+                {activeTab}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="hidden sm:inline-flex items-center gap-1.5 cursor-pointer text-[11px] text-[var(--cf-text-muted)] hover:text-white">
+                <input
+                  type="checkbox"
+                  checked={acceptAllDevices}
+                  onChange={(e) => setAcceptAllDevices(e.target.checked)}
+                  className="rounded accent-[var(--cf-blue)]"
+                />
+                <span>All devices</span>
+              </label>
+              <a
+                href="https://esp.virt.cc.cd"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[11px] font-mono text-[var(--cf-text-muted)] hover:text-sky-400 flex items-center gap-1"
+              >
+                <span>esp.virt.cc.cd</span>
+                <ArrowSquareOut size={11} />
+              </a>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <label className="hidden sm:inline-flex items-center gap-1.5 cursor-pointer text-[11px] text-[var(--cf-text-muted)] hover:text-white">
-              <input
-                type="checkbox"
-                checked={acceptAllDevices}
-                onChange={(e) => setAcceptAllDevices(e.target.checked)}
-                className="rounded accent-[var(--cf-blue)]"
-              />
-              <span>All devices</span>
-            </label>
-            <a
-              href="https://esp.virt.cc.cd"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[11px] font-mono text-[var(--cf-text-muted)] hover:text-sky-400 flex items-center gap-1"
-            >
-              <span>esp.virt.cc.cd</span>
-              <ArrowSquareOut size={11} />
-            </a>
+          {/* Cloudflare Kumo Segmented Control Navigation (10 Compact Tabs) */}
+          <div className="pb-2.5 overflow-x-auto scrollbar-none">
+            <Tabs
+              variant="segmented"
+              size="sm"
+              value={activeTab}
+              onValueChange={(val) => navigateTab(val as TabType)}
+              tabs={mainTabs}
+              className="w-full"
+            />
           </div>
-        </div>
-
-        {/* Cloudflare Kumo Segmented Control Navigation (10 Compact Tabs) */}
-        <div className="pb-2.5 overflow-x-auto scrollbar-none -mx-2 px-2 sm:mx-0 sm:px-0">
-          <Tabs
-            variant="segmented"
-            size="sm"
-            value={activeTab}
-            onValueChange={(val) => navigateTab(val as TabType)}
-            tabs={mainTabs}
-            className="w-full"
-          />
         </div>
       </section>
 
       {/* ====================================================================
           3. Main Content Body
           ==================================================================== */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-5">
         {!bluetoothSupported && (
           <div className="mb-4">
             <Banner variant="error" title="Web Bluetooth Required">
@@ -2884,60 +2888,10 @@ export function Dashboard({
       </main>
 
       {/* ====================================================================
-          4. Native Mobile Bottom Navigation Bar (5 core shortcuts)
+          4. Cloudflare Global Contained Footer
           ==================================================================== */}
-      <nav className="cf-bottom-nav md:hidden" aria-label="Mobile Navigation">
-        <button
-          onClick={() => navigateTab("overview")}
-          className={`cf-bottom-nav-item ${activeTab === "overview" ? "active" : ""}`}
-        >
-          <Broadcast size={18} weight={activeTab === "overview" ? "fill" : "regular"} />
-          <span>Overview</span>
-        </button>
-
-        <button
-          onClick={() => navigateTab("tools")}
-          className={`cf-bottom-nav-item ${activeTab === "tools" ? "active" : ""}`}
-        >
-          <Globe size={18} weight={activeTab === "tools" ? "fill" : "regular"} />
-          <span>Tools</span>
-        </button>
-
-        <button
-          onClick={() => navigateTab("hardware")}
-          className={`cf-bottom-nav-item ${activeTab === "hardware" ? "active" : ""}`}
-        >
-          <Cpu size={18} weight={activeTab === "hardware" ? "fill" : "regular"} />
-          <span>Hardware</span>
-        </button>
-
-        <button
-          onClick={() => navigateTab("gpio")}
-          className={`cf-bottom-nav-item ${activeTab === "gpio" ? "active" : ""}`}
-        >
-          <SlidersHorizontal size={18} weight={activeTab === "gpio" ? "fill" : "regular"} />
-          <span>Control</span>
-        </button>
-
-        <button
-          onClick={() => navigateTab("console")}
-          className={`cf-bottom-nav-item ${activeTab === "console" ? "active" : ""}`}
-        >
-          <div className="relative">
-            <Terminal size={18} weight={activeTab === "console" ? "fill" : "regular"} />
-            {logs.length > 0 && (
-              <span className="absolute -top-1 -right-2 w-2 h-2 rounded-full bg-[var(--cf-blue)]" />
-            )}
-          </div>
-          <span>Logs</span>
-        </button>
-      </nav>
-
-      {/* ====================================================================
-          5. Cloudflare Global Footer (Desktop only)
-          ==================================================================== */}
-      <footer className="hidden md:block mt-auto border-t border-[var(--cf-border)] bg-[var(--cf-nav-bg)] py-3 px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-[var(--cf-text-faint)]">
+      <footer className="mt-auto border-t border-[var(--cf-border)] bg-[var(--cf-nav-bg)] py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[var(--cf-text-faint)]">
           <div className="flex items-center gap-2">
             <Cpu size={14} className="text-[var(--cf-blue)]" />
             <span>ESP32-S3 Remote Console · Vinext RSC · Cloudflare Workers Edge</span>
@@ -2947,7 +2901,7 @@ export function Dashboard({
               href="https://github.com/unesp32/esp32-remote"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-[var(--cf-text-strong)]"
+              className="hover:text-[var(--cf-text-strong)] transition-colors"
             >
               GitHub
             </a>
@@ -2955,7 +2909,7 @@ export function Dashboard({
               href="https://bgp.he.net"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-[var(--cf-text-strong)]"
+              className="hover:text-[var(--cf-text-strong)] transition-colors"
             >
               he.net BGP
             </a>
@@ -2963,9 +2917,9 @@ export function Dashboard({
               href="https://www.cloudflarestatus.com"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-[var(--cf-text-strong)]"
+              className="hover:text-[var(--cf-text-strong)] transition-colors"
             >
-              Status
+              Cloudflare Status
             </a>
           </div>
         </div>

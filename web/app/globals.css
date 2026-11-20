@@ -18,24 +18,24 @@
   --cf-blue-border: rgba(0, 81, 195, 0.28);
 
   /* Kumo Surfaces (Light) */
-  --cf-bg: #fafafa;
+  --cf-bg: #f5f6f8;
   --cf-nav-bg: #ffffff;
   --cf-subnav-bg: #ffffff;
   --cf-card-bg: #ffffff;
-  --cf-card-elev: #f4f4f6;
-  --cf-inset: #f0f0f3;
+  --cf-card-elev: #f9fafb;
+  --cf-inset: #edf0f5;
   --cf-input-bg: #ffffff;
 
   /* Kumo Borders (Light) */
-  --cf-border: #e4e4e7;
-  --cf-border-strong: #d4d4d8;
-  --cf-border-subtle: #f0f0f3;
+  --cf-border: #dbe0e6;
+  --cf-border-strong: #c2c8d2;
+  --cf-border-subtle: #edf1f7;
 
   /* Kumo Typography (Light) */
-  --cf-text-strong: #09090b;
-  --cf-text: #18181b;
-  --cf-text-muted: #71717a;
-  --cf-text-faint: #a1a1aa;
+  --cf-text-strong: #0f172a;
+  --cf-text: #1e293b;
+  --cf-text-muted: #64748b;
+  --cf-text-faint: #94a3b8;
 
   /* Status Colors */
   --cf-success: #10b981;
@@ -58,6 +58,22 @@
   --radius-pill: 9999px;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Kumo Direct Token Overrides (Light) */
+  --color-kumo-brand: var(--cf-blue);
+  --color-kumo-brand-hover: var(--cf-blue-hover);
+  --text-color-kumo-brand: var(--cf-blue);
+  --text-color-kumo-link: var(--cf-blue);
+  --color-kumo-focus: var(--cf-blue);
+  --color-kumo-canvas: var(--cf-bg);
+  --color-kumo-base: var(--cf-card-bg);
+  --color-kumo-elevated: var(--cf-card-elev);
+  --color-kumo-recessed: var(--cf-inset);
+  --color-kumo-line: var(--cf-border);
+  --color-kumo-hairline: var(--cf-border-strong);
+  --text-color-kumo-strong: var(--cf-text-strong);
+  --text-color-kumo-default: var(--cf-text);
+  --text-color-kumo-subtle: var(--cf-text-muted);
 }
 
 [data-theme="dark"],
@@ -70,25 +86,25 @@
   --cf-blue-subtle: rgba(47, 128, 237, 0.12);
   --cf-blue-border: rgba(47, 128, 237, 0.38);
 
-  /* Kumo Surfaces (Dark - deep jet black, strictly neutral) */
-  --cf-bg: #080808;
-  --cf-nav-bg: #0e0e10;
-  --cf-subnav-bg: #0e0e10;
-  --cf-card-bg: #121214;
-  --cf-card-elev: #17171a;
-  --cf-inset: #1a1a1d;
-  --cf-input-bg: #141416;
+  /* Kumo Surfaces (Dark - deep refined neutral Cloudflare dark) */
+  --cf-bg: #101114;
+  --cf-nav-bg: #15171b;
+  --cf-subnav-bg: #15171b;
+  --cf-card-bg: #191b20;
+  --cf-card-elev: #202228;
+  --cf-inset: #21242b;
+  --cf-input-bg: #181a1f;
 
-  /* Kumo Borders (Dark - pure neutral greys) */
-  --cf-border: #262629;
-  --cf-border-strong: #36363a;
-  --cf-border-subtle: #1c1c1f;
+  /* Kumo Borders (Dark - subtle refined neutral lines) */
+  --cf-border: #292c34;
+  --cf-border-strong: #3b3f4a;
+  --cf-border-subtle: #1e2026;
 
   /* Kumo Typography (Dark - pure high contrast) */
-  --cf-text-strong: #fafafa;
-  --cf-text: #e4e4e7;
-  --cf-text-muted: #8e8e93;
-  --cf-text-faint: #5a5a60;
+  --cf-text-strong: #f8fafc;
+  --cf-text: #e2e8f0;
+  --cf-text-muted: #94a3b8;
+  --cf-text-faint: #64748b;
 
   /* Status Colors */
   --cf-success: #10b981;
@@ -101,9 +117,25 @@
   --cf-info-bg: rgba(47, 128, 237, 0.14);
 
   /* Terminal Surface */
-  --cf-term-bg: #040405;
-  --cf-term-header: #0a0a0c;
-  --cf-term-border: #222225;
+  --cf-term-bg: #0b0c0e;
+  --cf-term-header: #141519;
+  --cf-term-border: #24262d;
+
+  /* Kumo Direct Token Overrides (Dark) */
+  --color-kumo-brand: var(--cf-blue);
+  --color-kumo-brand-hover: var(--cf-blue-hover);
+  --text-color-kumo-brand: var(--cf-blue);
+  --text-color-kumo-link: var(--cf-blue);
+  --color-kumo-focus: var(--cf-blue);
+  --color-kumo-canvas: var(--cf-bg);
+  --color-kumo-base: var(--cf-card-bg);
+  --color-kumo-elevated: var(--cf-card-elev);
+  --color-kumo-recessed: var(--cf-inset);
+  --color-kumo-line: var(--cf-border);
+  --color-kumo-hairline: var(--cf-border-strong);
+  --text-color-kumo-strong: var(--cf-text-strong);
+  --text-color-kumo-default: var(--cf-text);
+  --text-color-kumo-subtle: var(--cf-text-muted);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -115,31 +147,46 @@
     --cf-blue-subtle: rgba(47, 128, 237, 0.12);
     --cf-blue-border: rgba(47, 128, 237, 0.38);
 
-    --cf-bg: #080808;
-    --cf-nav-bg: #0e0e10;
-    --cf-subnav-bg: #0e0e10;
-    --cf-card-bg: #121214;
-    --cf-card-elev: #17171a;
-    --cf-inset: #1a1a1d;
-    --cf-input-bg: #141416;
+    --cf-bg: #101114;
+    --cf-nav-bg: #15171b;
+    --cf-subnav-bg: #15171b;
+    --cf-card-bg: #191b20;
+    --cf-card-elev: #202228;
+    --cf-inset: #21242b;
+    --cf-input-bg: #181a1f;
 
-    --cf-border: #262629;
-    --cf-border-strong: #36363a;
-    --cf-border-subtle: #1c1c1f;
+    --cf-border: #292c34;
+    --cf-border-strong: #3b3f4a;
+    --cf-border-subtle: #1e2026;
 
-    --cf-text-strong: #fafafa;
-    --cf-text: #e4e4e7;
-    --cf-text-muted: #8e8e93;
-    --cf-text-faint: #5a5a60;
+    --cf-text-strong: #f8fafc;
+    --cf-text: #e2e8f0;
+    --cf-text-muted: #94a3b8;
+    --cf-text-faint: #64748b;
 
     --cf-success: #10b981;
     --cf-warning: #f59e0b;
     --cf-danger: #ef4444;
     --cf-info: #2f80ed;
 
-    --cf-term-bg: #040405;
-    --cf-term-header: #0a0a0c;
-    --cf-term-border: #222225;
+    --cf-term-bg: #0b0c0e;
+    --cf-term-header: #141519;
+    --cf-term-border: #24262d;
+
+    --color-kumo-brand: #2f80ed;
+    --color-kumo-brand-hover: #1a6cd4;
+    --text-color-kumo-brand: #2f80ed;
+    --text-color-kumo-link: #2f80ed;
+    --color-kumo-focus: #2f80ed;
+    --color-kumo-canvas: #101114;
+    --color-kumo-base: #191b20;
+    --color-kumo-elevated: #202228;
+    --color-kumo-recessed: #21242b;
+    --color-kumo-line: #292c34;
+    --color-kumo-hairline: #3b3f4a;
+    --text-color-kumo-strong: #f8fafc;
+    --text-color-kumo-default: #e2e8f0;
+    --text-color-kumo-subtle: #94a3b8;
   }
 }
 
@@ -223,14 +270,11 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
   height: 52px;
   background: var(--cf-nav-bg);
   border-bottom: 1px solid var(--cf-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1.25rem;
   position: sticky;
   top: 0;
   z-index: 50;
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .cf-logo-wrapper {
@@ -260,7 +304,7 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
 .cf-sub-nav {
   background: var(--cf-subnav-bg);
   border-bottom: 1px solid var(--cf-border);
-  padding: 1.25rem 1.25rem 0.75rem 1.25rem;
+  padding: 0.75rem 0 0.25rem 0;
 }
 
 .cf-breadcrumbs {
@@ -540,49 +584,44 @@ progress.cf-progress.sky::-webkit-progress-value { background: #0284c7; }
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-@media (max-width: 768px) {
-  .cf-app-shell {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 64px);
-  }
-}
-.cf-bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: calc(56px + env(safe-area-inset-bottom, 0px));
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: var(--cf-nav-bg);
-  border-top: 1px solid var(--cf-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  z-index: 50;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-.cf-bottom-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  height: 100%;
-  padding: 4px 0;
-  color: var(--cf-text-muted);
-  font-size: 0.6875rem;
+
+/* --------------------------------------------------------------------------
+   Cloudflare Native Button & Tab Enhancements
+   -------------------------------------------------------------------------- */
+[data-kumo-component="Button"][data-variant="primary"],
+button[data-kumo-component="Button"][data-variant="primary"],
+button[data-kumo-component="Button"]:is([class*="bg-(--kumo-button-emphasis-bg)"]) {
+  background: var(--cf-blue) !important;
+  color: #ffffff !important;
+  border-radius: var(--radius-sm);
   font-weight: 500;
-  transition: color 0.15s ease;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  gap: 2px;
+  transition: all 0.15s ease;
 }
-.cf-bottom-nav-item.active {
-  color: var(--cf-blue);
-  font-weight: 600;
+[data-kumo-component="Button"][data-variant="primary"]:hover:not(:disabled),
+button[data-kumo-component="Button"][data-variant="primary"]:hover:not(:disabled),
+button[data-kumo-component="Button"]:is([class*="bg-(--kumo-button-emphasis-bg)"]):hover:not(:disabled) {
+  background: var(--cf-blue-hover) !important;
 }
-.cf-bottom-nav-item svg { transition: transform 0.15s ease; }
-.cf-bottom-nav-item.active svg { transform: translateY(-1px); }
+[data-kumo-component="Button"][data-variant="primary"]:active:not(:disabled),
+button[data-kumo-component="Button"][data-variant="primary"]:active:not(:disabled),
+button[data-kumo-component="Button"]:is([class*="bg-(--kumo-button-emphasis-bg)"]):active:not(:disabled) {
+  background: var(--cf-blue-active) !important;
+}
+
+[data-kumo-component="Button"][data-variant="secondary"],
+button[data-kumo-component="Button"][data-variant="secondary"] {
+  background: var(--cf-card-bg) !important;
+  color: var(--cf-text-strong) !important;
+  border: 1px solid var(--cf-border) !important;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+[data-kumo-component="Button"][data-variant="secondary"]:hover:not(:disabled),
+button[data-kumo-component="Button"][data-variant="secondary"]:hover:not(:disabled) {
+  background: var(--cf-card-elev) !important;
+  border-color: var(--cf-border-strong) !important;
+}
 
 .cf-quick-action-pill {
   display: inline-flex;
